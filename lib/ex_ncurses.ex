@@ -14,6 +14,24 @@ defmodule ExNcurses do
   def fun(:F11), do: 275
   def fun(:F12), do: 276
 
+  # colors
+  def clr(:COLOR_BLACK), do: 0
+  def clr(:BLACK),       do: 0
+  def clr(:COLOR_RED),   do: 1
+  def clr(:RED),         do: 1
+  def clr(:COLOR_GREEN), do: 2
+  def clr(:GREEN),       do: 2
+  def clr(:COLOR_YELLOW),do: 3
+  def clr(:YELLOW),      do: 3
+  def clr(:COLOR_BLUE),  do: 4
+  def clr(:BLUE),        do: 4
+  def clr(:COLOR_MAGENTA),do:	5
+  def clr(:MAGENTA),     do:	5
+  def clr(:COLOR_CYAN),  do: 6
+  def clr(:CYAN),        do: 6
+  def clr(:COLOR_WHITE), do: 7
+  def clr(:WHITE),       do: 7
+
   def init() do
     r = :erlang.load_nif("./priv/ex_ncurses", 0)
     IO.inspect r
@@ -33,6 +51,8 @@ defmodule ExNcurses do
   def ex_cbreak(),   do: raise ExNcursesNifNotLoaded
   def ex_nocbreak(), do: raise ExNcursesNifNotLoaded
 
+  def ex_noecho(),   do: raise ExNcursesNifNotLoaded
+
   def cols(),        do: raise ExNcursesNifNotLoaded
   def lines(),       do: raise ExNcursesNifNotLoaded
   def ex_getx(),     do: raise ExNcursesNifNotLoaded
@@ -40,6 +60,9 @@ defmodule ExNcurses do
 
   def ex_flushinp(), do: raise ExNcursesNifNotLoaded
   def ex_keypad(),   do: raise ExNcursesNifNotLoaded
+
+  def ex_start_color(), do: raise ExNcursesNifNotLoaded
+  def ex_init_pair(_pair,_f,_b),do: raise ExNcursesNifNotLoaded
 
   def ex_getch(),    do: raise ExNcursesNifNotLoaded
   # not implemented in C
@@ -56,7 +79,7 @@ defmodule ExNcurses do
     case chr do
       127 ->
         handle_delete(x)
-        [h|t] = str
+        [_h|t] = str
         do_getstr(t, x, getchar())
       -1 ->
         do_getstr(str, x, getchar())

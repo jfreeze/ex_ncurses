@@ -2,6 +2,15 @@ defmodule ExNcurses.Demo do
   import ExNcurses
 
   def main(_args) do
+    run_samples
+    run_c_samples
+  end
+
+  def run_c_samples do
+    #Border.run()
+  end
+
+  def run_samples do
     ncurses_begin()
     sample_1()
     ex_clear()

@@ -105,6 +105,13 @@ ex_nocbreak(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_noecho(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+	  int code = noecho();
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
 ex_printw(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     ErlNifBinary string;
@@ -192,6 +199,38 @@ ex_keypad(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_start_color(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (argc != 0 )
+        return enif_make_badarg(env);
+
+	  int code = start_color();
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
+ex_init_pair(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    int pair, f, b;
+
+    if (argc != 3 )
+        return enif_make_badarg(env);
+
+    if (! enif_get_int(env, argv[0], &pair))
+      return enif_make_badarg(env);
+
+    if (! enif_get_int(env, argv[1], &f))
+      return enif_make_badarg(env);
+
+    if (! enif_get_int(env, argv[2], &b))
+      return enif_make_badarg(env);
+
+	  int code = init_pair(pair, f, b);
+
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
 ex_gety(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   int y = getcury(stdscr);
@@ -259,6 +298,8 @@ static ErlNifFunc nif_funcs[] =
     {"ex_cbreak", 0, ex_cbreak},
     {"ex_nocbreak", 0, ex_nocbreak},
 
+    {"ex_noecho", 0, ex_noecho},
+
     {"ex_printw", 1, ex_printw},
     {"ex_mvprintw", 3, ex_mvprintw},
 
@@ -269,7 +310,10 @@ static ErlNifFunc nif_funcs[] =
 
     {"ex_flushinp", 0, ex_flushinp},
     {"ex_keypad", 0, ex_keypad},
-    {"ex_getch", 0, ex_getch}
+    {"ex_getch", 0, ex_getch},
+
+    {"ex_start_color", 0, ex_start_color},
+    {"ex_init_pair", 3, ex_init_pair}
 };
 
 ERL_NIF_INIT(Elixir.ExNcurses, nif_funcs,
