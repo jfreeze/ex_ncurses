@@ -29,7 +29,7 @@ defmodule ExNcurses.Demo do
     cols = cols()
     lines = lines()
     ex_cbreak()
-    for x <- (1..4), do: print_fox()
+    for _x <- (1..4), do: print_fox()
     ex_printw("\n")
     ex_printw("AA\n")
     ex_printw("BB\n")

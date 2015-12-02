@@ -1,5 +1,15 @@
 defmodule ExNcurses do
- @on_load :init
+  @on_load :init
+
+  def init() do
+    dir  = Path.dirname(__DIR__)
+    path = Path.join(dir, "priv")
+    path = Path.join(path, "ex_ncurses")
+    IO.inspect path
+    :erlang.load_nif(path, 0)
+    :ok
+  end
+
 
   def fun(:F1), do: 265
   def fun(:F2), do: 266
@@ -31,12 +41,6 @@ defmodule ExNcurses do
   def clr(:CYAN),        do: 6
   def clr(:COLOR_WHITE), do: 7
   def clr(:WHITE),       do: 7
-
-  def init() do
-    r = :erlang.load_nif("./priv/ex_ncurses", 0)
-    IO.inspect r
-    :ok
-  end
 
   def ex_initscr(),  do: raise ExNcursesNifNotLoaded
   def ex_endwin(),   do: raise ExNcursesNifNotLoaded
