@@ -4,6 +4,7 @@ erl=$(wildcard /usr/local/Cellar/erlang/**/lib/erlang/usr/include)
 INC=$(addprefix "-I", $(erl))
 
 priv/ex_ncurses.so : src/ex_ncurses.c
+	@mkdir -p $(@D)
 	$(CC) $(INC) -fPIC -shared -undefined dynamic_lookup -dynamiclib src/ex_ncurses.c -o priv/ex_ncurses.so -lncurses
 
 
