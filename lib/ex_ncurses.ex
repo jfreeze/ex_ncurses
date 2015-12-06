@@ -10,7 +10,6 @@ defmodule ExNcurses do
     :ok
   end
 
-
   def fun(:F1), do: 265
   def fun(:F2), do: 266
   def fun(:F3), do: 267
@@ -69,8 +68,6 @@ defmodule ExNcurses do
   def ex_init_pair(_pair,_f,_b),do: raise ExNcursesNifNotLoaded
 
   def ex_getch(),    do: raise ExNcursesNifNotLoaded
-  # not implemented in C
-  def ex_getstr(),   do: do_getstr([], ex_getx(), getchar())
 
   def getchar() do
     do_getchar(ex_getch())
@@ -78,7 +75,11 @@ defmodule ExNcurses do
   def do_getchar(-1), do: getchar()
   def do_getchar(c), do: c
 
-  def do_getstr(str, _x, 10), do: String.reverse(List.to_string(['\n' | str]))
+  # not implemented in nif
+  def ex_getstr(),   do: do_getstr([], ex_getx(), getchar())
+  def do_getstr(str, _x, 10) do
+    String.reverse(List.to_string(['\n' | str]))
+  end
   def do_getstr(str, x, chr) do
     case chr do
       127 ->
@@ -92,6 +93,7 @@ defmodule ExNcurses do
     end
   end
 
+  # Simple minded positioning. Does not account for line wrap.
   defp handle_delete(x) do
     cx = ex_getx()
     cy = ex_gety()
@@ -104,6 +106,7 @@ defmodule ExNcurses do
     ex_mvprintw(cy, nx, "")  # move not implemented
   end
 
+  # Common initialization
   def ncurses_begin() do
     ex_initscr()
     ex_raw()
@@ -114,7 +117,5 @@ defmodule ExNcurses do
     ex_nocbreak()
     ex_endwin()
   end
-
-  def hello(),       do: raise ExNcursesNifNotLoaded
 
 end

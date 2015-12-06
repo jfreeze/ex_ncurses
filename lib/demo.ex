@@ -64,7 +64,6 @@ defmodule ExNcurses.Demo do
     ex_flushinp() # clear input
     char = getchar()
     ex_mvprintw(y+1, x, "You entered '#{char}'\n")
-
     # F1 exits
     if char != fun(:F1), do: sample_2a()
   end

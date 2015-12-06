@@ -49,14 +49,6 @@ static ERL_NIF_TERM
     return enif_make_int(env, code);
 }
 
-/*
-static ERL_NIF_TERM
-done_with_value(ErlNifEnv* env, char *str)
-{
-    return enif_make_string(env, str, ERL_NIF_LATIN1);
-}
-*/
-
 ERL_NIF_TERM mk_error(ErlNifEnv* env, const char* mesg)
 {
     return enif_make_tuple2(env, mk_atom(env, "error"), mk_atom(env, mesg));
@@ -176,14 +168,10 @@ ex_getch(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 /*
+  // This is implemented in ex_ncurses.ex
 static ERL_NIF_TERM
 ex_getstr(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  //extern NCURSES_EXPORT(int) getstr (char *);
-  //timeout(1);
-    int code = getstr(str);
-
-    return done_with_value(env, str);
 }
 */
 
@@ -256,37 +244,8 @@ lines(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     return enif_make_int(env, LINES);
 }
 
-
-
-static ERL_NIF_TERM
-hello(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-	  WINDOW *my_win;
-	  int startx, starty, width, height;
-    char buffer [100];
-    sprintf(buffer, "argc is: %d", argc);
-    int r = 0;
-    sprintf(buffer, "Hello world! - %d", r);
-
-    initscr();                      /* Start curses mode            */
-    noecho();
-    cbreak();                       /* Line buffering disabled, Pass on
-                                  * everty thing to me           */
-    keypad(stdscr, TRUE);           /* I need that nifty F1         */
-
-    height = 3;
-    width = 10;
-    starty = (LINES - height) / 2;  /* Calculating for a center placement */
-    startx = (COLS - width) / 2;    /* of the window                */
-    mvprintw(starty, startx, "Press F1 to exit");
-    refresh();
-    return enif_make_string(env, buffer, ERL_NIF_LATIN1);
-}
-
 static ErlNifFunc nif_funcs[] =
 {
-    {"hello", 0, hello},
-
     {"ex_initscr", 0, ex_initscr},
     {"ex_endwin", 0, ex_endwin},
 

@@ -7,7 +7,10 @@ defmodule ExNcurses.Mixfile do
      elixir: "~> 1.1",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     escript: [main_module: ExNcurses.Demo],
+     escript: [
+       main_module: ExNcurses.Demo,
+       path: "priv/demo"
+     ],
 #     compilers: [:ex_ncurses],
 #     clean: ["clean"],
      deps: deps]
