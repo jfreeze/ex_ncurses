@@ -32,6 +32,10 @@ The package is available on [github](https://github.com/jfreeze/ex_ncurses) can 
         ]
         end
 
+## Sample Project
+
+You can see a version of @ElixirSips QuickieSynth project using ExNcurses at [https://github.com/jfreeze/quickie_synth](https://github.com/jfreeze/quickie_synth)
+
 ## Compiling
 
 The project can be compiled from your parent project with
