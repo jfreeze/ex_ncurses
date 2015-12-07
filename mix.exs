@@ -11,7 +11,7 @@ defmodule ExNcurses.Mixfile do
        main_module: ExNcurses.Demo,
        path: "priv/demo"
      ],
-     compilers: [:ex_ncurses],
+#     compilers: [:ex_ncurses],
      clean: ["clean"],
      deps: deps]
   end
