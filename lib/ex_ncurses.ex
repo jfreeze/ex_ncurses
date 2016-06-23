@@ -1,13 +1,11 @@
 defmodule ExNcurses do
-  @on_load :init
+  #@compile {:autoload, false}
+  @on_load {:init, 0}
 
   def init() do
-    dir  = Path.dirname(__DIR__)
-    path = Path.join(dir, "priv")
-    path = Path.join(path, "ex_ncurses")
-    IO.inspect path
-    :erlang.load_nif(path, 0)
-    :ok
+    Path.dirname(__DIR__)
+    |> Path.join("priv/ncurses")
+    |> :erlang.load_nif(0)
   end
 
   def fun(:F1), do: 265
