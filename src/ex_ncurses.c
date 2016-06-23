@@ -246,33 +246,33 @@ lines(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
 static ErlNifFunc nif_funcs[] =
 {
-    {"ex_initscr", 0, ex_initscr},
-    {"ex_endwin", 0, ex_endwin},
+    {"ex_initscr",      0, ex_initscr,    0},
+    {"ex_endwin",       0, ex_endwin,     0},
 
-    {"ex_clear", 0, ex_clear},
-    {"ex_refresh", 0, ex_refresh},
+    {"ex_clear",        0, ex_clear,      0},
+    {"ex_refresh",      0, ex_refresh,    0},
 
-    {"ex_raw", 0, ex_raw},
+    {"ex_raw",          0, ex_raw,        0},
 
-    {"ex_cbreak", 0, ex_cbreak},
-    {"ex_nocbreak", 0, ex_nocbreak},
+    {"ex_cbreak",       0, ex_cbreak,     0},
+    {"ex_nocbreak",     0, ex_nocbreak,   0},
 
-    {"ex_noecho", 0, ex_noecho},
+    {"ex_noecho",       0, ex_noecho,     0},
 
-    {"ex_printw", 1, ex_printw},
-    {"ex_mvprintw", 3, ex_mvprintw},
+    {"ex_printw",       1, ex_printw,     0},
+    {"ex_mvprintw",     3, ex_mvprintw,   0},
 
-    {"cols", 0, cols},
-    {"lines", 0, lines},
-    {"ex_getx", 0, ex_getx},
-    {"ex_gety", 0, ex_gety},
+    {"cols",            0, cols,          0},
+    {"lines",           0, lines,         0},
+    {"ex_getx",         0, ex_getx,       0},
+    {"ex_gety",         0, ex_gety,       0},
 
-    {"ex_flushinp", 0, ex_flushinp},
-    {"ex_keypad", 0, ex_keypad},
-    {"ex_getch", 0, ex_getch},
+    {"ex_flushinp",     0, ex_flushinp,   0},
+    {"ex_keypad",       0, ex_keypad,     0},
+    {"ex_getch",        0, ex_getch,      0},
 
-    {"ex_start_color", 0, ex_start_color},
-    {"ex_init_pair", 3, ex_init_pair}
+    {"ex_start_color",  0, ex_start_color, 0},
+    {"ex_init_pair",    3, ex_init_pair,  0}
 };
 
 ERL_NIF_INIT(Elixir.ExNcurses, nif_funcs,

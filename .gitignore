@@ -3,4 +3,5 @@
 erl_crash.dump
 *.ez
 ex_ncurses
-priv/ex_ncurses.so
+priv/
+src/*.o
