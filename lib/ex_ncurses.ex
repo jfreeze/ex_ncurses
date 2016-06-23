@@ -4,7 +4,7 @@ defmodule ExNcurses do
 
   def init() do
     Path.dirname(__DIR__)
-    |> Path.join("priv/ncurses")
+    |> Path.join("priv/ex_ncurses")
     |> :erlang.load_nif(0)
   end
 
