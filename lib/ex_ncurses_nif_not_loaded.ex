@@ -1,7 +1,5 @@
 defmodule ExNcursesNifNotLoaded do
   defexception [:message]
 
-  def exception(thing) do
-    IO.inspect thing
-  end
+  def message(e), do: e.message || "ncurses nif not loaded"
 end
