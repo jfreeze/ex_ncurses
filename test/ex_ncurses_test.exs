@@ -1,6 +1,6 @@
-defmodule HelloworldTest do
+defmodule ExNcursesTest do
   use ExUnit.Case
-  doctest Helloworld
+  doctest ExNcurses
 
   test "the truth" do
     assert 1 + 1 == 2

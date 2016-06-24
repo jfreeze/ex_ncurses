@@ -24,20 +24,26 @@ endif
 ERL_CFLAGS ?= -I$(ERL_EI_INCLUDE_DIR)
 ERL_LDFLAGS ?= -L$(ERL_EI_LIBDIR) -lncurses
 
-LDFLAGS += -fPIC -shared -undefined dynamic_lookup -dynamiclib
+LDFLAGS += -fPIC -shared  -dynamiclib
 CFLAGS ?= -O2 -Wall -Wextra -Wno-unused-parameter
 CC ?= $(CROSSCOMPILER)gcc
 
+ifeq ($(CROSSCOMPILE),)
+ifeq ($(shell uname),Darwin)
+LDFLAGS += -undefined dynamic_lookup
+endif
+endif
+
 .PHONY: all clean
 
-all: priv/ex_ncurses
+all: priv/ncurses_nif
 
 %.o: %.c
 	$(CC) -c $(ERL_CFLAGS) $(CFLAGS) -o $@ $<
 
-priv/ex_ncurses: src/ex_ncurses.o
+priv/ncurses_nif: src/ncurses_nif.o
 	@mkdir -p priv
 	$(CC) $^ $(ERL_LDFLAGS) $(LDFLAGS) -o $@.so
 
 clean:
-	rm -f priv/ex_ncurses.so src/*.o
+	rm -f priv/ncurses_nif.so src/*.o

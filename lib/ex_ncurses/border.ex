@@ -6,24 +6,22 @@ defmodule ExNcurses.Border do
   close as reasonable.
   """
 
-  import ExNcurses
-
   def run do
-	ex_initscr()			# Start curses mode
-	ex_start_color();	# Start the color functionality
-	ex_cbreak();			# Line buffering disabled, Pass on
+	ExNcurses.initscr()			# Start curses mode
+	ExNcurses.start_color();	# Start the color functionality
+	ExNcurses.cbreak();			# Line buffering disabled, Pass on
                     # everty thing to me
-	ex_keypad()		    # I need that nifty F1
-	ex_noecho()
-	ex_init_pair(1, clr(:COLOR_CYAN), clr(:COLOR_BLACK))
+	ExNcurses.keypad()		    # I need that nifty F1
+	ExNcurses.noecho()
+	ExNcurses.init_pair(1, ExNcurses.clr(:COLOR_CYAN), ExNcurses.clr(:COLOR_BLACK))
 
 #	/* Initialize the window parameters */
 #	init_win_params(&win);
 #	print_win_params(&win);
 #
 #	attron(COLOR_PAIR(1));
-	ex_printw("Press F1 to exit")
-	ex_refresh()
+	ExNcurses.printw("Press F1 to exit")
+	ExNcurses.refresh()
   :timer.sleep 3000
 #	attroff(COLOR_PAIR(1));
 #
@@ -52,6 +50,6 @@ defmodule ExNcurses.Border do
 #				break;
 #		}
 #	}
-	ex_endwin()			# End curses mode
+	ExNcurses.endwin()			# End curses mode
   end
 end

@@ -1,11 +1,13 @@
 defmodule ExNcurses do
-  #@compile {:autoload, false}
+  @compile {:autoload, false}
   @on_load {:init, 0}
 
   def init() do
-    Path.dirname(__DIR__)
-    |> Path.join("priv/ex_ncurses")
-    |> :erlang.load_nif(0)
+    path = :filename.join(:code.priv_dir(:ex_ncurses), 'ncurses_nif')
+    case :erlang.load_nif(path, 0) do
+      :ok -> :ok
+      error -> {:error, error}
+    end
   end
 
   def fun(:F1), do: 265
@@ -39,46 +41,72 @@ defmodule ExNcurses do
   def clr(:COLOR_WHITE), do: 7
   def clr(:WHITE),       do: 7
 
-  def ex_initscr(),  do: raise ExNcursesNifNotLoaded
-  def ex_endwin(),   do: raise ExNcursesNifNotLoaded
+  def initscr(),          do: ex_initscr()
+  def endwin(),           do: ex_endwin()
 
-  def ex_printw(_s), do: raise ExNcursesNifNotLoaded
-  def ex_mvprintw(_y, _x, _s), do: raise ExNcursesNifNotLoaded
+  def printw(s),          do: ex_printw(s)
+  def mvprintw(y, x, s),  do: ex_mvprintw(y, x, s)
 
-  def ex_refresh(),  do: raise ExNcursesNifNotLoaded
-  def ex_clear(),    do: raise ExNcursesNifNotLoaded
+  def refresh(),          do: ex_refresh()
+  def clear(),            do: ex_clear()
 
-  def ex_raw(),      do: raise ExNcursesNifNotLoaded
-  def ex_cbreak(),   do: raise ExNcursesNifNotLoaded
-  def ex_nocbreak(), do: raise ExNcursesNifNotLoaded
+  def raw(),              do: ex_raw()
+  def cbreak(),           do: ex_cbreak()
+  def nocbreak(),         do: ex_nocbreak()
 
-  def ex_noecho(),   do: raise ExNcursesNifNotLoaded
+  def noecho(),           do: ex_noecho()
 
-  def cols(),        do: raise ExNcursesNifNotLoaded
-  def lines(),       do: raise ExNcursesNifNotLoaded
-  def ex_getx(),     do: raise ExNcursesNifNotLoaded
-  def ex_gety(),     do: raise ExNcursesNifNotLoaded
+  def getx(),             do: ex_getx()
+  def gety(),             do: ex_gety()
 
-  def ex_flushinp(), do: raise ExNcursesNifNotLoaded
-  def ex_keypad(),   do: raise ExNcursesNifNotLoaded
+  def flushinp(),         do: ex_flushinp()
+  def keypad(),           do: ex_keypad()
 
-  def ex_start_color(), do: raise ExNcursesNifNotLoaded
-  def ex_init_pair(_pair,_f,_b),do: raise ExNcursesNifNotLoaded
+  def start_color(),      do: ex_start_color()
+  def init_pair(pair, f, b), do: ex_init_pair(pair, f, b)
 
-  def ex_getch(),    do: raise ExNcursesNifNotLoaded
+  def getch(),            do: ex_getch()
+
+  def ex_initscr(),             do: ExNcursesNifNotLoaded
+  def ex_endwin(),              do: ExNcursesNifNotLoaded
+
+  def ex_printw(_s),            do: ExNcursesNifNotLoaded
+  def ex_mvprintw(_y, _x, _s),  do: ExNcursesNifNotLoaded
+
+  def ex_refresh(),             do: ExNcursesNifNotLoaded
+  def ex_clear(),               do: ExNcursesNifNotLoaded
+
+  def ex_raw(),                 do: ExNcursesNifNotLoaded
+  def ex_cbreak(),              do: ExNcursesNifNotLoaded
+  def ex_nocbreak(),            do: ExNcursesNifNotLoaded
+
+  def ex_noecho(),              do: ExNcursesNifNotLoaded
+
+  def ex_getx(),                do: ExNcursesNifNotLoaded
+  def ex_gety(),                do: ExNcursesNifNotLoaded
+
+  def ex_flushinp(),            do: ExNcursesNifNotLoaded
+  def ex_keypad(),              do: ExNcursesNifNotLoaded
+
+  def ex_start_color(),         do: ExNcursesNifNotLoaded
+  def ex_init_pair(_pair, _f, _b), do: ExNcursesNifNotLoaded
+
+  def ex_getch(),               do: ExNcursesNifNotLoaded
+  def cols(),                   do: ExNcursesNifNotLoaded
+  def lines(),                  do: ExNcursesNifNotLoaded
 
   def getchar() do
-    do_getchar(ex_getch())
+    do_getchar(getch())
   end
-  def do_getchar(-1), do: getchar()
-  def do_getchar(c), do: c
+  defp do_getchar(-1), do: getchar()
+  defp do_getchar(c), do: c
 
   # not implemented in nif
-  def ex_getstr(),   do: do_getstr([], ex_getx(), getchar())
-  def do_getstr(str, _x, 10) do
+  def getstr(),   do: do_getstr([], getx(), getchar())
+  defp do_getstr(str, _x, 10) do
     String.reverse(List.to_string(['\n' | str]))
   end
-  def do_getstr(str, x, chr) do
+  defp do_getstr(str, x, chr) do
     case chr do
       127 ->
         handle_delete(x)
@@ -93,27 +121,27 @@ defmodule ExNcurses do
 
   # Simple minded positioning. Does not account for line wrap.
   defp handle_delete(x) do
-    cx = ex_getx()
-    cy = ex_gety()
+    cx = getx()
+    cy = gety()
     nx = max(x, cx-1)
-    ex_mvprintw(cy, nx, " ") # remove ?
+    mvprintw(cy, nx, " ") # remove ?
     nx = max(x, nx-1)
-    ex_mvprintw(cy, nx, " ") # remove ^
+    mvprintw(cy, nx, " ") # remove ^
     nx = max(x, nx-1)
-    ex_mvprintw(cy, nx, " ") # remove <char>
-    ex_mvprintw(cy, nx, "")  # move not implemented
+    mvprintw(cy, nx, " ") # remove <char>
+    mvprintw(cy, nx, "")  # move not implemented
   end
 
   # Common initialization
-  def ncurses_begin() do
-    ex_initscr()
-    ex_raw()
-    ex_cbreak()
+  def n_begin() do
+    initscr()
+    raw()
+    cbreak()
   end
 
-  def ncurses_end() do
-    ex_nocbreak()
-    ex_endwin()
+  def n_end() do
+    nocbreak()
+    endwin()
   end
 
 end
