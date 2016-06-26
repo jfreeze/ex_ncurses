@@ -36,14 +36,14 @@ endif
 
 .PHONY: all clean
 
-all: priv/ncurses_nif
+all: priv/ncurses_nif.so
 
 %.o: %.c
 	$(CC) -c $(ERL_CFLAGS) $(CFLAGS) -o $@ $<
 
-priv/ncurses_nif: src/ncurses_nif.o
+priv/ncurses_nif.so: src/ncurses_nif.o
 	@mkdir -p priv
-	$(CC) $^ $(ERL_LDFLAGS) $(LDFLAGS) -o $@.so
+	$(CC) $^ $(ERL_LDFLAGS) $(LDFLAGS) -o $@
 
 clean:
 	rm -f priv/ncurses_nif.so src/*.o
