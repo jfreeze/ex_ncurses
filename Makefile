@@ -25,7 +25,7 @@ ERL_CFLAGS ?= -I$(ERL_EI_INCLUDE_DIR)
 ERL_LDFLAGS ?= -L$(ERL_EI_LIBDIR) -lncurses
 
 LDFLAGS += -fPIC -shared  -dynamiclib
-CFLAGS ?= -O2 -Wall -Wextra -Wno-unused-parameter
+CFLAGS ?= -fPIC -O2 -Wall -Wextra -Wno-unused-parameter
 CC ?= $(CROSSCOMPILER)gcc
 
 ifeq ($(CROSSCOMPILE),)
