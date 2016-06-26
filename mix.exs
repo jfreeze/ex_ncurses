@@ -34,6 +34,6 @@ defmodule ExNcurses.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:elixir_make, "~> 0.1"}]
+    [{:elixir_make, "~> 0.3"}]
   end
 end
