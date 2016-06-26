@@ -67,33 +67,33 @@ defmodule ExNcurses do
 
   def getch(),            do: ex_getch()
 
-  def ex_initscr(),             do: ExNcursesNifNotLoaded
-  def ex_endwin(),              do: ExNcursesNifNotLoaded
+  def ex_initscr(),             do: exit(:nif_library_not_loaded)
+  def ex_endwin(),              do: exit(:nif_library_not_loaded)
 
-  def ex_printw(_s),            do: ExNcursesNifNotLoaded
-  def ex_mvprintw(_y, _x, _s),  do: ExNcursesNifNotLoaded
+  def ex_printw(_s),            do: exit(:nif_library_not_loaded)
+  def ex_mvprintw(_y, _x, _s),  do: exit(:nif_library_not_loaded)
 
-  def ex_refresh(),             do: ExNcursesNifNotLoaded
-  def ex_clear(),               do: ExNcursesNifNotLoaded
+  def ex_refresh(),             do: exit(:nif_library_not_loaded)
+  def ex_clear(),               do: exit(:nif_library_not_loaded)
 
-  def ex_raw(),                 do: ExNcursesNifNotLoaded
-  def ex_cbreak(),              do: ExNcursesNifNotLoaded
-  def ex_nocbreak(),            do: ExNcursesNifNotLoaded
+  def ex_raw(),                 do: exit(:nif_library_not_loaded)
+  def ex_cbreak(),              do: exit(:nif_library_not_loaded)
+  def ex_nocbreak(),            do: exit(:nif_library_not_loaded)
 
-  def ex_noecho(),              do: ExNcursesNifNotLoaded
+  def ex_noecho(),              do: exit(:nif_library_not_loaded)
 
-  def ex_getx(),                do: ExNcursesNifNotLoaded
-  def ex_gety(),                do: ExNcursesNifNotLoaded
+  def ex_getx(),                do: exit(:nif_library_not_loaded)
+  def ex_gety(),                do: exit(:nif_library_not_loaded)
 
-  def ex_flushinp(),            do: ExNcursesNifNotLoaded
-  def ex_keypad(),              do: ExNcursesNifNotLoaded
+  def ex_flushinp(),            do: exit(:nif_library_not_loaded)
+  def ex_keypad(),              do: exit(:nif_library_not_loaded)
 
-  def ex_start_color(),         do: ExNcursesNifNotLoaded
-  def ex_init_pair(_pair, _f, _b), do: ExNcursesNifNotLoaded
+  def ex_start_color(),         do: exit(:nif_library_not_loaded)
+  def ex_init_pair(_pair, _f, _b), do: exit(:nif_library_not_loaded)
 
-  def ex_getch(),               do: ExNcursesNifNotLoaded
-  def cols(),                   do: ExNcursesNifNotLoaded
-  def lines(),                  do: ExNcursesNifNotLoaded
+  def ex_getch(),               do: exit(:nif_library_not_loaded)
+  def cols(),                   do: exit(:nif_library_not_loaded)
+  def lines(),                  do: exit(:nif_library_not_loaded)
 
   def getchar() do
     do_getchar(getch())
