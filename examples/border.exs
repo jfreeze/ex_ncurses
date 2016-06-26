@@ -1,4 +1,4 @@
-defmodule ExNcurses.Border do
+defmodule Border do
   @moduledoc """
   Replica of border.c in sample_csrc directory
 
@@ -53,3 +53,5 @@ defmodule ExNcurses.Border do
 	ExNcurses.endwin()			# End curses mode
   end
 end
+
+Border.run
