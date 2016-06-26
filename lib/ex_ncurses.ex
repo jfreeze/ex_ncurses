@@ -41,57 +41,31 @@ defmodule ExNcurses do
   def clr(:COLOR_WHITE), do: 7
   def clr(:WHITE),       do: 7
 
-  def initscr(),          do: ex_initscr()
-  def endwin(),           do: ex_endwin()
+  def initscr(),             do: exit(:nif_library_not_loaded)
+  def endwin(),              do: exit(:nif_library_not_loaded)
 
-  def printw(s),          do: ex_printw(s)
-  def mvprintw(y, x, s),  do: ex_mvprintw(y, x, s)
+  def printw(_s),            do: exit(:nif_library_not_loaded)
+  def mvprintw(_y, _x, _s),  do: exit(:nif_library_not_loaded)
 
-  def refresh(),          do: ex_refresh()
-  def clear(),            do: ex_clear()
+  def refresh(),             do: exit(:nif_library_not_loaded)
+  def clear(),               do: exit(:nif_library_not_loaded)
 
-  def raw(),              do: ex_raw()
-  def cbreak(),           do: ex_cbreak()
-  def nocbreak(),         do: ex_nocbreak()
+  def raw(),                 do: exit(:nif_library_not_loaded)
+  def cbreak(),              do: exit(:nif_library_not_loaded)
+  def nocbreak(),            do: exit(:nif_library_not_loaded)
 
-  def noecho(),           do: ex_noecho()
+  def noecho(),              do: exit(:nif_library_not_loaded)
 
-  def getx(),             do: ex_getx()
-  def gety(),             do: ex_gety()
+  def getx(),                do: exit(:nif_library_not_loaded)
+  def gety(),                do: exit(:nif_library_not_loaded)
 
-  def flushinp(),         do: ex_flushinp()
-  def keypad(),           do: ex_keypad()
+  def flushinp(),            do: exit(:nif_library_not_loaded)
+  def keypad(),              do: exit(:nif_library_not_loaded)
 
-  def start_color(),      do: ex_start_color()
-  def init_pair(pair, f, b), do: ex_init_pair(pair, f, b)
+  def start_color(),         do: exit(:nif_library_not_loaded)
+  def init_pair(_pair, _f, _b), do: exit(:nif_library_not_loaded)
 
-  def getch(),            do: ex_getch()
-
-  def ex_initscr(),             do: exit(:nif_library_not_loaded)
-  def ex_endwin(),              do: exit(:nif_library_not_loaded)
-
-  def ex_printw(_s),            do: exit(:nif_library_not_loaded)
-  def ex_mvprintw(_y, _x, _s),  do: exit(:nif_library_not_loaded)
-
-  def ex_refresh(),             do: exit(:nif_library_not_loaded)
-  def ex_clear(),               do: exit(:nif_library_not_loaded)
-
-  def ex_raw(),                 do: exit(:nif_library_not_loaded)
-  def ex_cbreak(),              do: exit(:nif_library_not_loaded)
-  def ex_nocbreak(),            do: exit(:nif_library_not_loaded)
-
-  def ex_noecho(),              do: exit(:nif_library_not_loaded)
-
-  def ex_getx(),                do: exit(:nif_library_not_loaded)
-  def ex_gety(),                do: exit(:nif_library_not_loaded)
-
-  def ex_flushinp(),            do: exit(:nif_library_not_loaded)
-  def ex_keypad(),              do: exit(:nif_library_not_loaded)
-
-  def ex_start_color(),         do: exit(:nif_library_not_loaded)
-  def ex_init_pair(_pair, _f, _b), do: exit(:nif_library_not_loaded)
-
-  def ex_getch(),               do: exit(:nif_library_not_loaded)
+  def getch(),               do: exit(:nif_library_not_loaded)
   def cols(),                   do: exit(:nif_library_not_loaded)
   def lines(),                  do: exit(:nif_library_not_loaded)
 
