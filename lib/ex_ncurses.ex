@@ -63,11 +63,14 @@ defmodule ExNcurses do
   def keypad(),              do: exit(:nif_library_not_loaded)
 
   def start_color(),         do: exit(:nif_library_not_loaded)
+  def has_colors(),          do: exit(:nif_library_not_loaded)
   def init_pair(_pair, _f, _b), do: exit(:nif_library_not_loaded)
+  def attron(_pair),         do: exit(:nif_library_not_loaded)
+  def attroff(_pair),        do: exit(:nif_library_not_loaded)
 
   def getch(),               do: exit(:nif_library_not_loaded)
-  def cols(),                   do: exit(:nif_library_not_loaded)
-  def lines(),                  do: exit(:nif_library_not_loaded)
+  def cols(),                do: exit(:nif_library_not_loaded)
+  def lines(),               do: exit(:nif_library_not_loaded)
 
   def getchar() do
     do_getchar(getch())
