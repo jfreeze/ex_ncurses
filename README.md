@@ -6,14 +6,11 @@ Ncurses Nif for Elixir (or Erlang)
 ExNcurses is a Nif that you can add to your project and monitor
 keyboard inputs one character at a time.
 
-Note, however, in order for this to work, programs must be compiled
-with <code>'mix escript.build'</code>.
-
 Testing ncurses inside an 'iex -S mix' console will fail to work after a few keystrokes.
 
 ## Usage
 
-For usage, you can look at the example code in demo.ex,
+For usage, you can look at the code in the `examples` directory
 or check out the QuickieSynth sample project (@elixirsips)
 where we show a version using ExNcurses.
 
@@ -32,32 +29,19 @@ The package is available on [github](https://github.com/jfreeze/ex_ncurses) can 
         ]
         end
 
-## Sample Project
-
-You can see a version of @ElixirSips QuickieSynth project using ExNcurses at [https://github.com/jfreeze/quickie_synth](https://github.com/jfreeze/quickie_synth)
-
 ## Compiling
 
-The project can be compiled from your parent project with
+You will need to install the `ncurses` library and C header files first. Do this
+however is appropriate for your system.
 
-    mix deps.compile
+Then the project can be compiled with
 
-## Working with ExNcurses
+    mix deps.get
+    mix compile
 
-This project compiles a Nif to
+### Run the examples
 
-    mix compile.ex_ncurses
+To run any of the examples, start them by invoking the `run_example.sh` script:
 
-or
+    ./run_example.sh demo
 
-    mix demo
-
-### Run the Demo
-
-    ./priv/demo
-
-The Makefile assumes ncurses is already installed, that Erlang is installed with brew, and is only tested for OS X.  You may need to edit the Makefile for other systems.
-
-Compile the Nif with either <code>make</code> or
-
-    mix compile.ex_ncurses
