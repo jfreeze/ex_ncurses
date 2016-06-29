@@ -13,14 +13,14 @@ alloc_and_copy_to_cstring(ErlNifBinary *string)
 }
 
 void free_cstring(char * str) {
-  enif_free(str);
+    enif_free(str);
 }
 
 ERL_NIF_TERM mk_atom(ErlNifEnv* env, const char* atom)
 {
     ERL_NIF_TERM ret;
 
-    if(!enif_make_existing_atom(env, atom, &ret, ERL_NIF_LATIN1))
+    if (!enif_make_existing_atom(env, atom, &ret, ERL_NIF_LATIN1))
     {
         return enif_make_atom(env, atom);
     }
@@ -197,6 +197,18 @@ ex_start_color(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_has_colors(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    if (argc != 0 )
+        return enif_make_badarg(env);
+
+    if (has_colors())
+        return mk_atom(env, "true");
+    else
+        return mk_atom(env, "false");
+}
+
+static ERL_NIF_TERM
 ex_init_pair(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     int pair, f, b;
@@ -219,6 +231,38 @@ ex_init_pair(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_attron(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    int pair;
+
+    if (argc != 1 )
+        return enif_make_badarg(env);
+
+    if (!enif_get_int(env, argv[0], &pair))
+      return enif_make_badarg(env);
+
+	  int code = attron(COLOR_PAIR(pair));
+
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
+ex_attroff(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    int pair;
+
+    if (argc != 1 )
+        return enif_make_badarg(env);
+
+    if (!enif_get_int(env, argv[0], &pair))
+      return enif_make_badarg(env);
+
+	  int code = attroff(COLOR_PAIR(pair));
+
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
 ex_gety(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   int y = getcury(stdscr);
@@ -233,46 +277,49 @@ ex_getx(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-cols(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ex_cols(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     return enif_make_int(env, COLS);
 }
 
 static ERL_NIF_TERM
-lines(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ex_lines(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     return enif_make_int(env, LINES);
 }
 
 static ErlNifFunc nif_funcs[] =
 {
-    {"ex_initscr",      0, ex_initscr,    0},
-    {"ex_endwin",       0, ex_endwin,     0},
+    {"initscr",      0, ex_initscr,    0},
+    {"endwin",       0, ex_endwin,     0},
 
-    {"ex_clear",        0, ex_clear,      0},
-    {"ex_refresh",      0, ex_refresh,    0},
+    {"clear",        0, ex_clear,      0},
+    {"refresh",      0, ex_refresh,    0},
 
-    {"ex_raw",          0, ex_raw,        0},
+    {"raw",          0, ex_raw,        0},
 
-    {"ex_cbreak",       0, ex_cbreak,     0},
-    {"ex_nocbreak",     0, ex_nocbreak,   0},
+    {"cbreak",       0, ex_cbreak,     0},
+    {"nocbreak",     0, ex_nocbreak,   0},
 
-    {"ex_noecho",       0, ex_noecho,     0},
+    {"noecho",       0, ex_noecho,     0},
 
-    {"ex_printw",       1, ex_printw,     0},
-    {"ex_mvprintw",     3, ex_mvprintw,   0},
+    {"printw",       1, ex_printw,     0},
+    {"mvprintw",     3, ex_mvprintw,   0},
 
-    {"cols",            0, cols,          0},
-    {"lines",           0, lines,         0},
-    {"ex_getx",         0, ex_getx,       0},
-    {"ex_gety",         0, ex_gety,       0},
+    {"cols",         0, ex_cols,       0},
+    {"lines",        0, ex_lines,      0},
+    {"getx",         0, ex_getx,       0},
+    {"gety",         0, ex_gety,       0},
 
-    {"ex_flushinp",     0, ex_flushinp,   0},
-    {"ex_keypad",       0, ex_keypad,     0},
-    {"ex_getch",        0, ex_getch,      0},
+    {"flushinp",     0, ex_flushinp,   0},
+    {"keypad",       0, ex_keypad,     0},
+    {"getch",        0, ex_getch,      0},
 
-    {"ex_start_color",  0, ex_start_color, 0},
-    {"ex_init_pair",    3, ex_init_pair,  0}
+    {"start_color",  0, ex_start_color, 0},
+    {"has_colors",   0, ex_has_colors, 0},
+    {"init_pair",    3, ex_init_pair,  0},
+    {"attron",       1, ex_attron,     0},
+    {"attroff",      1, ex_attroff,    0},
 };
 
 ERL_NIF_INIT(Elixir.ExNcurses, nif_funcs,

@@ -1,17 +1,6 @@
-defmodule ExNcurses.Demo do
+defmodule Demo do
 
-  def main(_args) do
-    Code.ensure_loaded(:ex_ncurses)
-    |> IO.inspect
-    run_samples
-    run_c_samples
-  end
-
-  def run_c_samples do
-    #Border.run()
-  end
-
-  def run_samples do
+  def run do
     ExNcurses.n_begin()
     sample_1()
     ExNcurses.clear()
@@ -19,6 +8,7 @@ defmodule ExNcurses.Demo do
     ExNcurses.clear()
     sample_3()
     ExNcurses.n_end()
+    IO.puts "Done!!"
   end
 
   def print_fox do
@@ -80,3 +70,5 @@ defmodule ExNcurses.Demo do
     ExNcurses.getchar()
   end
 end
+
+Demo.run
