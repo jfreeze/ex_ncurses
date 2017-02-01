@@ -9,7 +9,7 @@ defmodule ExNcurses.Mixfile do
      start_permanent: Mix.env == :prod,
      compilers: [:elixir_make] ++ Mix.compilers,
      make_clean: ["clean"],
-     deps: deps]
+     deps: deps()]
   end
 
   # Configuration for the OTP application
