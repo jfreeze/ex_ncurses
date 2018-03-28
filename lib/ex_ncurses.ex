@@ -3,12 +3,9 @@ defmodule ExNcurses do
   @on_load {:init, 0}
 
   def init() do
-    path = :filename.join(:code.priv_dir(:ex_ncurses), 'ncurses_nif')
-
-    case :erlang.load_nif(path, 0) do
-      :ok -> :ok
-      error -> {:error, error}
-    end
+    Application.app_dir(:ex_ncurses, "priv/ncurses_nif")
+    |> to_charlist
+    |> :erlang.load_nif(0)
   end
 
   def fun(:F1), do: 265
