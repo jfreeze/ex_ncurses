@@ -42,36 +42,36 @@ defmodule ExNcurses do
   def clr(:COLOR_WHITE), do: 7
   def clr(:WHITE), do: 7
 
-  def initscr(), do: exit(:nif_library_not_loaded)
-  def endwin(), do: exit(:nif_library_not_loaded)
+  def initscr(), do: :erlang.nif_error(:nif_not_loaded)
+  def endwin(), do: :erlang.nif_error(:nif_not_loaded)
 
-  def printw(_s), do: exit(:nif_library_not_loaded)
-  def mvprintw(_y, _x, _s), do: exit(:nif_library_not_loaded)
+  def printw(_s), do: :erlang.nif_error(:nif_not_loaded)
+  def mvprintw(_y, _x, _s), do: :erlang.nif_error(:nif_not_loaded)
 
-  def refresh(), do: exit(:nif_library_not_loaded)
-  def clear(), do: exit(:nif_library_not_loaded)
+  def refresh(), do: :erlang.nif_error(:nif_not_loaded)
+  def clear(), do: :erlang.nif_error(:nif_not_loaded)
 
-  def raw(), do: exit(:nif_library_not_loaded)
-  def cbreak(), do: exit(:nif_library_not_loaded)
-  def nocbreak(), do: exit(:nif_library_not_loaded)
+  def raw(), do: :erlang.nif_error(:nif_not_loaded)
+  def cbreak(), do: :erlang.nif_error(:nif_not_loaded)
+  def nocbreak(), do: :erlang.nif_error(:nif_not_loaded)
 
-  def noecho(), do: exit(:nif_library_not_loaded)
+  def noecho(), do: :erlang.nif_error(:nif_not_loaded)
 
-  def getx(), do: exit(:nif_library_not_loaded)
-  def gety(), do: exit(:nif_library_not_loaded)
+  def getx(), do: :erlang.nif_error(:nif_not_loaded)
+  def gety(), do: :erlang.nif_error(:nif_not_loaded)
 
-  def flushinp(), do: exit(:nif_library_not_loaded)
-  def keypad(), do: exit(:nif_library_not_loaded)
+  def flushinp(), do: :erlang.nif_error(:nif_not_loaded)
+  def keypad(), do: :erlang.nif_error(:nif_not_loaded)
 
-  def start_color(), do: exit(:nif_library_not_loaded)
-  def has_colors(), do: exit(:nif_library_not_loaded)
-  def init_pair(_pair, _f, _b), do: exit(:nif_library_not_loaded)
-  def attron(_pair), do: exit(:nif_library_not_loaded)
-  def attroff(_pair), do: exit(:nif_library_not_loaded)
+  def start_color(), do: :erlang.nif_error(:nif_not_loaded)
+  def has_colors(), do: :erlang.nif_error(:nif_not_loaded)
+  def init_pair(_pair, _f, _b), do: :erlang.nif_error(:nif_not_loaded)
+  def attron(_pair), do: :erlang.nif_error(:nif_not_loaded)
+  def attroff(_pair), do: :erlang.nif_error(:nif_not_loaded)
 
-  def getch(), do: exit(:nif_library_not_loaded)
-  def cols(), do: exit(:nif_library_not_loaded)
-  def lines(), do: exit(:nif_library_not_loaded)
+  def getch(), do: :erlang.nif_error(:nif_not_loaded)
+  def cols(), do: :erlang.nif_error(:nif_not_loaded)
+  def lines(), do: :erlang.nif_error(:nif_not_loaded)
 
   def getchar() do
     do_getchar(getch())
