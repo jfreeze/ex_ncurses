@@ -1,12 +1,5 @@
 defmodule ExNcurses do
-  @compile {:autoload, false}
-  @on_load {:init, 0}
-
-  def init() do
-    Application.app_dir(:ex_ncurses, "priv/ncurses_nif")
-    |> to_charlist
-    |> :erlang.load_nif(0)
-  end
+  alias ExNcurses.Server
 
   def fun(:F1), do: 265
   def fun(:F2), do: 266
@@ -39,36 +32,36 @@ defmodule ExNcurses do
   def clr(:COLOR_WHITE), do: 7
   def clr(:WHITE), do: 7
 
-  def initscr(), do: :erlang.nif_error(:nif_not_loaded)
-  def endwin(), do: :erlang.nif_error(:nif_not_loaded)
+  def initscr(), do: Server.invoke(:initscr)
+  def endwin(), do:  Server.invoke(:endwin)
 
-  def printw(_s), do: :erlang.nif_error(:nif_not_loaded)
-  def mvprintw(_y, _x, _s), do: :erlang.nif_error(:nif_not_loaded)
+  def printw(s), do:  Server.invoke(:printw, {s})
+  def mvprintw(y, x, s), do:  Server.invoke(:mvprintw, {y, x, s})
 
-  def refresh(), do: :erlang.nif_error(:nif_not_loaded)
-  def clear(), do: :erlang.nif_error(:nif_not_loaded)
+  def refresh(), do:  Server.invoke(:refresh)
+  def clear(), do:  Server.invoke(:clear)
 
-  def raw(), do: :erlang.nif_error(:nif_not_loaded)
-  def cbreak(), do: :erlang.nif_error(:nif_not_loaded)
-  def nocbreak(), do: :erlang.nif_error(:nif_not_loaded)
+  def raw(), do:  Server.invoke(:raw)
+  def cbreak(), do:  Server.invoke(:cbreak)
+  def nocbreak(), do:  Server.invoke(:nocbreak)
 
-  def noecho(), do: :erlang.nif_error(:nif_not_loaded)
+  def noecho(), do:  Server.invoke(:noecho)
 
-  def getx(), do: :erlang.nif_error(:nif_not_loaded)
-  def gety(), do: :erlang.nif_error(:nif_not_loaded)
+  def getx(), do:  Server.invoke(:getx)
+  def gety(), do:  Server.invoke(:gety)
 
-  def flushinp(), do: :erlang.nif_error(:nif_not_loaded)
-  def keypad(), do: :erlang.nif_error(:nif_not_loaded)
+  def flushinp(), do:  Server.invoke(:flushinp)
+  def keypad(), do:  Server.invoke(:keypad)
 
-  def start_color(), do: :erlang.nif_error(:nif_not_loaded)
-  def has_colors(), do: :erlang.nif_error(:nif_not_loaded)
-  def init_pair(_pair, _f, _b), do: :erlang.nif_error(:nif_not_loaded)
-  def attron(_pair), do: :erlang.nif_error(:nif_not_loaded)
-  def attroff(_pair), do: :erlang.nif_error(:nif_not_loaded)
+  def start_color(), do:  Server.invoke(:start_color)
+  def has_colors(), do:  Server.invoke(:has_colors)
+  def init_pair(pair, f, b), do:  Server.invoke(:init_pair, {pair, f, b})
+  def attron(pair), do:  Server.invoke(:attron, {pair})
+  def attroff(pair), do:  Server.invoke(:attroff, {pair})
 
-  def getch(), do: :erlang.nif_error(:nif_not_loaded)
-  def cols(), do: :erlang.nif_error(:nif_not_loaded)
-  def lines(), do: :erlang.nif_error(:nif_not_loaded)
+  def getch(), do:  {:error, :not_supported_yet}
+  def cols(), do:  Server.invoke(:cols)
+  def lines(), do:  Server.invoke(:lines)
 
   def getchar() do
     do_getchar(getch())
@@ -127,4 +120,6 @@ defmodule ExNcurses do
     nocbreak()
     endwin()
   end
+
+  defdelegate listen(), to: Server
 end

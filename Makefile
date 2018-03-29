@@ -41,7 +41,7 @@ all: priv/ncurses_nif.so
 %.o: %.c
 	$(CC) -c $(ERL_CFLAGS) $(CFLAGS) -o $@ $<
 
-priv/ncurses_nif.so: src/ncurses_nif.o
+priv/ncurses_nif.so: src/ex_ncurses.o
 	@mkdir -p priv
 	$(CC) $^ $(ERL_LDFLAGS) $(LDFLAGS) -o $@
 

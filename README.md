@@ -16,18 +16,18 @@ where we show a version using ExNcurses.
 
    [github.com/jfreeze/ex_ncurses](https://github.com/jfreeze/ex_ncurses)
 
-
 ## Installation
 
-The package is available on [github](https://github.com/jfreeze/ex_ncurses) can be installed as:
+The package is available on [github](https://github.com/jfreeze/ex_ncurses) can be installed
+by adding `ex_ncurses` to your list of dependencies in `mix.exs`:
 
-  1. Add ex_ncurses to your list of dependencies in your `mix.exs`:
-
-        def deps do
-        [
-          {:ex_ncurses, git: "https://github.com/jfreeze/ex_ncurses.git"}
-        ]
-        end
+```elixir
+def deps do
+  [
+    {:ex_ncurses, git: "https://github.com/jfreeze/ex_ncurses.git"}
+  ]
+end
+```
 
 ## Compiling
 

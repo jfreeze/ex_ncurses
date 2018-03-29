@@ -1,36 +1,37 @@
-defmodule ExNcurses.Mixfile do
+defmodule ExNcurses.MixProject do
   use Mix.Project
 
   def project do
     [
       app: :ex_ncurses,
       version: "0.0.2",
-      elixir: "~> 1.1",
-      build_embedded: Mix.env() == :prod,
+      package: package(),
+      elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      compilers: [:elixir_make] ++ Mix.compilers(),
-      make_clean: ["clean"],
-      deps: deps()
+      deps: deps(),
+      compilers: [:elixir_make | Mix.compilers()],
+      make_clean: ["clean"]
     ]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type "mix help compile.app" for more information
+  # Run "mix help compile.app" to learn about applications.
   def application do
-    [applications: []]
+    [
+      extra_applications: [:logger],
+      mod: {ExNcurses.Application, []}
+    ]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type "mix help deps" for more examples and options
+  # Run "mix help deps" to learn about dependencies.
   defp deps do
-    [{:elixir_make, "~> 0.4", runtime: false}]
+    [{:elixir_make, "~> 0.4", runtime: false}, {:ex_doc, "~> 0.11", only: :dev}]
+  end
+
+  defp package() do
+    [
+      maintainers: [""],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/jfreeze/ex_ncurses"}
+    ]
   end
 end
