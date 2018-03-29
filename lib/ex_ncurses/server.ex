@@ -1,8 +1,10 @@
 defmodule ExNcurses.Server do
   use GenServer
   alias ExNcurses.Nif
+  @moduledoc false
 
   defmodule State do
+    @moduledoc false
     defstruct pid: nil
   end
 

@@ -1,6 +1,19 @@
 defmodule ExNcurses do
   alias ExNcurses.Server
 
+  @moduledoc """
+  ExNcurses lets Elixir programs create text-based user interfaces using ncurses.
+
+  Aside from keyboard input, ExNcurses looks almost like a straight translation of the C-based
+  ncurses API. ExNcurses sends key events via messages. See `listen/0` for this.
+
+  See http://pubs.opengroup.org/onlinepubs/7908799/xcurses/curses.h.html for ncurses documentation.
+
+  NOTE: if you're using the IEx prompt, ExNcurses will quickly take it over. Calling `endwin/0`
+  will let you return the the IEx prompt. You may see some errors momentarily though when the
+  Erlang VM detects two uses of stdin.
+  """
+
   def fun(:F1), do: 265
   def fun(:F2), do: 266
   def fun(:F3), do: 267
@@ -32,12 +45,24 @@ defmodule ExNcurses do
   def clr(:COLOR_WHITE), do: 7
   def clr(:WHITE), do: 7
 
+  @doc """
+  Initialize ncurses
+  """
   def initscr(), do: Server.invoke(:initscr)
+
+  @doc """
+  Stop using ncurses and clean the terminal back up.
+  """
   def endwin(), do: Server.invoke(:endwin)
 
+  @doc """
+  """
   def printw(s), do: Server.invoke(:printw, {s})
   def mvprintw(y, x, s), do: Server.invoke(:mvprintw, {y, x, s})
 
+  @doc """
+  Refresh the display.
+  """
   def refresh(), do: Server.invoke(:refresh)
   def clear(), do: Server.invoke(:clear)
 
@@ -62,6 +87,11 @@ defmodule ExNcurses do
   def cols(), do: Server.invoke(:cols)
   def lines(), do: Server.invoke(:lines)
 
+  @doc """
+  Poll for a key press.
+
+  See `listen/0` for a better way of getting keyboard input.
+  """
   def getch() do
     listen()
 
@@ -108,6 +138,17 @@ defmodule ExNcurses do
     endwin()
   end
 
+  @doc """
+  Listen for events.
+
+  Events will be sent as messages of the form:
+
+  `{ex_ncurses, :key, key}`
+  """
   defdelegate listen(), to: Server
+
+  @doc """
+  Stop listening for events
+  """
   defdelegate stop_listening(), to: Server
 end
