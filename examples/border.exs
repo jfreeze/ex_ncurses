@@ -26,8 +26,9 @@ defmodule Border do
     # 	init_win_params(&win);
     # 	print_win_params(&win);
     #
-    # 	attron(COLOR_PAIR(1));
-    ExNcurses.printw("Press F1 to exit")
+    ExNcurses.attron(1);
+    ExNcurses.border()
+    ExNcurses.mvprintw(10, 10, "Press F1 to exit")
     ExNcurses.refresh()
     Process.sleep(3000)
     # 	attroff(COLOR_PAIR(1));

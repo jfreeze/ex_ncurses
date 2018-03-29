@@ -7,7 +7,10 @@ defmodule ExNcurses do
   Aside from keyboard input, ExNcurses looks almost like a straight translation of the C-based
   ncurses API. ExNcurses sends key events via messages. See `listen/0` for this.
 
-  See http://pubs.opengroup.org/onlinepubs/7908799/xcurses/curses.h.html for ncurses documentation.
+  Ncurses documentation can be found at:
+  * [The ncurses project page](https://www.gnu.org/software/ncurses/)
+  * [opengroup.org](http://pubs.opengroup.org/onlinepubs/7908799/xcurses/curses.h.html)
+  * [] for ncurses documentation.
 
   NOTE: if you're using the IEx prompt, ExNcurses will quickly take it over. Calling `endwin/0`
   will let you return the the IEx prompt. You may see some errors momentarily though when the
@@ -91,6 +94,11 @@ defmodule ExNcurses do
   def init_pair(pair, f, b), do: Server.invoke(:init_pair, {pair, f, b})
   def attron(pair), do: Server.invoke(:attron, {pair})
   def attroff(pair), do: Server.invoke(:attroff, {pair})
+  def setscrreg(top, bottom), do: Server.invoke(:setscrreg, {top, bottom})
+
+  def waddstr(win, str), do: Server.invoke(:waddstr, {win, str})
+
+  def newwin(nlines, ncols, begin_y, begin_x), do: Server.invoke(:newwin, {nlines, ncols, begin_y, begin_x})
 
   def cols(), do: Server.invoke(:cols)
   def lines(), do: Server.invoke(:lines)

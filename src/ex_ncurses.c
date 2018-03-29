@@ -9,6 +9,8 @@ struct ex_ncurses_priv {
     ERL_NIF_TERM atom_undefined;
 
     ErlNifResourceType *rt;
+    ErlNifResourceType *window_rt;
+
     void *resource;
 
     int stdin_fd;
@@ -17,6 +19,82 @@ struct ex_ncurses_priv {
     bool ncurses_initialized;
     bool polling;
 };
+
+// TODO: rename this to something
+static void rt_dtor(ErlNifEnv *env, void *obj)
+{
+    //enif_fprintf(stderr, "rt_dtor called\r\n");
+}
+
+static void rt_stop(ErlNifEnv *env, void *obj, int fd, int is_direct_call)
+{
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    //enif_fprintf(stderr, "rt_stop called %s, polling=%d\r\n", (is_direct_call ? "DIRECT" : "LATER"), data->polling);
+    if (data->polling && is_direct_call) {
+        enif_select(env, STDIN_FILENO, ERL_NIF_SELECT_STOP, obj, NULL, data->atom_undefined);
+        data->polling = false;
+    }
+}
+
+static void rt_down(ErlNifEnv *env, void *obj, ErlNifPid *pid, ErlNifMonitor *monitor)
+{
+    //enif_fprintf(stderr, "rt_down called\r\n");
+
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    if (data->polling) {
+        enif_select(env, data->stdin_fd, ERL_NIF_SELECT_STOP, obj, NULL, data->atom_undefined);
+        data->polling = false;
+    }
+}
+
+static ErlNifResourceTypeInit rt_init = {rt_dtor, rt_stop, rt_down};
+
+static void window_rt_dtor(ErlNifEnv *env, void *obj)
+{
+    enif_fprintf(stderr, "window_rt_dtor called\r\n");
+}
+
+static void window_rt_stop(ErlNifEnv *env, void *obj, int fd, int is_direct_call)
+{
+    enif_fprintf(stderr, "window_rt_stop called %s\r\n", (is_direct_call ? "DIRECT" : "LATER"));
+}
+
+static void window_rt_down(ErlNifEnv *env, void *obj, ErlNifPid *pid, ErlNifMonitor *monitor)
+{
+    enif_fprintf(stderr, "window_rt_down called\r\n");
+}
+
+static ErlNifResourceTypeInit window_rt_init = {window_rt_dtor, window_rt_stop, window_rt_down};
+
+static int load(ErlNifEnv *env, void **priv, ERL_NIF_TERM info)
+{
+    struct ex_ncurses_priv *data = enif_alloc(sizeof(struct ex_ncurses_priv));
+    if (!data)
+        return 1;
+
+    data->atom_ok = enif_make_atom(env, "ok");
+    data->atom_undefined = enif_make_atom(env, "undefined");
+
+    data->rt = enif_open_resource_type_x(env, "monitor", &rt_init, ERL_NIF_RT_CREATE, NULL);
+    data->window_rt = enif_open_resource_type_x(env, "window", &window_rt_init, ERL_NIF_RT_CREATE, NULL);
+
+    data->resource = enif_alloc_resource(data->rt, sizeof(int));
+
+    data->ncurses_initialized = false;
+    data->polling = false;
+
+    data->stdin_fd = -1;
+    data->stdin_fp = NULL;
+
+    *priv = (void *) data;
+
+    return 0;
+}
+
+static void unload(ErlNifEnv *env, void *priv)
+{
+    enif_free(priv);
+}
 
 static ERL_NIF_TERM make_error(ErlNifEnv *env, const char *error)
 {
@@ -139,6 +217,18 @@ ex_noecho(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_setscrreg(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    unsigned int top, bottom;
+    if (!enif_get_uint(env, argv[0], &top) ||
+        !enif_get_uint(env, argv[1], &bottom))
+        return enif_make_badarg(env);
+
+    int code = setscrreg(top, bottom);
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
 ex_printw(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     ErlNifBinary string;
@@ -192,13 +282,6 @@ static ERL_NIF_TERM
 ex_keypad(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int code = keypad(stdscr, TRUE);
-    return done(env, code);
-}
-
-static ERL_NIF_TERM
-ex_scrollok(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
-{
-    int code = scrollok(stdscr, TRUE);
     return done(env, code);
 }
 
@@ -312,60 +395,67 @@ ex_lines(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return enif_make_int(env, LINES);
 }
 
-static void rt_dtor(ErlNifEnv *env, void *obj)
+struct ex_window {
+    WINDOW *win;
+};
+
+static ERL_NIF_TERM
+ex_newwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
-    //enif_fprintf(stderr, "rt_dtor called\r\n");
+    int nlines, ncols, begin_y, begin_x;
+    if (!enif_get_int(env, argv[0], &nlines) ||
+        !enif_get_int(env, argv[0], &ncols) ||
+        !enif_get_int(env, argv[0], &begin_y) ||
+        !enif_get_int(env, argv[0], &begin_x))
+        return enif_make_badarg(env);
+
+    WINDOW *win = newwin(nlines, ncols, begin_y, begin_x);
+    if (win == NULL)
+        return make_error(env, "newwin");
+
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    struct ex_window *obj = enif_alloc_resource(data->window_rt, sizeof(struct ex_window));
+    obj->win = win;
+
+    enif_release_resource(obj); // Let Erlang manage this resource
+
+    return enif_make_resource(env, obj);
 }
 
-static void rt_stop(ErlNifEnv *env, void *obj, int fd, int is_direct_call)
+static int
+get_boolean(ErlNifEnv *env, ERL_NIF_TERM term, bool *v)
+{
+    char buffer[16];
+    if (enif_get_atom(env, term, buffer, sizeof(buffer), ERL_NIF_LATIN1) <= 0)
+        return false;
+
+    if (strcmp("false", buffer) == 0)
+        *v = false;
+    else
+        *v = true;
+
+    return true;
+}
+
+static ERL_NIF_TERM
+ex_scrollok(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
-    //enif_fprintf(stderr, "rt_stop called %s, polling=%d\r\n", (is_direct_call ? "DIRECT" : "LATER"), data->polling);
-    if (data->polling && is_direct_call) {
-        enif_select(env, STDIN_FILENO, ERL_NIF_SELECT_STOP, obj, NULL, data->atom_undefined);
-        data->polling = false;
+    WINDOW *win = stdscr;
+    bool is_scrollok = true;
+    if (argc == 2) {
+        struct ex_window *obj;
+        if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj) ||
+            !get_boolean(env, argv[1], &is_scrollok))
+             return enif_make_badarg(env);
+        win = obj->win;
     }
+    return done(env, scrollok(win, is_scrollok));
 }
 
-static void rt_down(ErlNifEnv *env, void *obj, ErlNifPid *pid, ErlNifMonitor *monitor)
+static ERL_NIF_TERM
+ex_waddstr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
-    //enif_fprintf(stderr, "rt_down called\r\n");
-
-    struct ex_ncurses_priv *data = enif_priv_data(env);
-    if (data->polling) {
-        enif_select(env, data->stdin_fd, ERL_NIF_SELECT_STOP, obj, NULL, data->atom_undefined);
-        data->polling = false;
-    }
-}
-
-static ErlNifResourceTypeInit rt_init = {rt_dtor, rt_stop, rt_down};
-
-static int load(ErlNifEnv *env, void **priv, ERL_NIF_TERM info)
-{
-    struct ex_ncurses_priv *data = enif_alloc(sizeof(struct ex_ncurses_priv));
-    if (!data)
-        return 1;
-
-    data->atom_ok = enif_make_atom(env, "ok");
-    data->atom_undefined = enif_make_atom(env, "undefined");
-
-    data->rt = enif_open_resource_type_x(env, "monitor", &rt_init, ERL_NIF_RT_CREATE, NULL);
-    data->resource = enif_alloc_resource(data->rt, sizeof(int));
-
-    data->ncurses_initialized = false;
-    data->polling = false;
-
-    data->stdin_fd = -1;
-    data->stdin_fp = NULL;
-
-    *priv = (void *) data;
-
-    return 0;
-}
-
-static void unload(ErlNifEnv *env, void *priv)
-{
-    enif_free(priv);
 }
 
 static ERL_NIF_TERM
@@ -443,11 +533,15 @@ static ErlNifFunc invoke_funcs[] = {
 
     {"noecho",       0, ex_noecho,     0},
 
+    {"setscrreg",    2, ex_setscrreg,  0},
+
     {"printw",       1, ex_printw,     0},
     {"addstr",       1, ex_printw,     0},
 
     {"mvprintw",     3, ex_mvprintw,   0},
     {"mvaddstr",     3, ex_mvprintw,   0},
+
+    {"newwin",       4, ex_newwin,     0},
 
     {"cols",         0, ex_cols,       0},
     {"lines",        0, ex_lines,      0},
@@ -460,6 +554,7 @@ static ErlNifFunc invoke_funcs[] = {
     {"getch",        0, ex_getch,      0},
     {"mvcur",        4, ex_mvcur,      0},
 
+    {"waddstr",      1, ex_waddstr,    0},
 
     {"start_color",  0, ex_start_color, 0},
     {"has_colors",   0, ex_has_colors, 0},
