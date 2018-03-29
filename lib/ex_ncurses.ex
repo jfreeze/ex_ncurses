@@ -33,35 +33,35 @@ defmodule ExNcurses do
   def clr(:WHITE), do: 7
 
   def initscr(), do: Server.invoke(:initscr)
-  def endwin(), do:  Server.invoke(:endwin)
+  def endwin(), do: Server.invoke(:endwin)
 
-  def printw(s), do:  Server.invoke(:printw, {s})
-  def mvprintw(y, x, s), do:  Server.invoke(:mvprintw, {y, x, s})
+  def printw(s), do: Server.invoke(:printw, {s})
+  def mvprintw(y, x, s), do: Server.invoke(:mvprintw, {y, x, s})
 
-  def refresh(), do:  Server.invoke(:refresh)
-  def clear(), do:  Server.invoke(:clear)
+  def refresh(), do: Server.invoke(:refresh)
+  def clear(), do: Server.invoke(:clear)
 
-  def raw(), do:  Server.invoke(:raw)
-  def cbreak(), do:  Server.invoke(:cbreak)
-  def nocbreak(), do:  Server.invoke(:nocbreak)
+  def raw(), do: Server.invoke(:raw)
+  def cbreak(), do: Server.invoke(:cbreak)
+  def nocbreak(), do: Server.invoke(:nocbreak)
 
-  def noecho(), do:  Server.invoke(:noecho)
+  def noecho(), do: Server.invoke(:noecho)
 
-  def getx(), do:  Server.invoke(:getx)
-  def gety(), do:  Server.invoke(:gety)
+  def getx(), do: Server.invoke(:getx)
+  def gety(), do: Server.invoke(:gety)
 
-  def flushinp(), do:  Server.invoke(:flushinp)
-  def keypad(), do:  Server.invoke(:keypad)
+  def flushinp(), do: Server.invoke(:flushinp)
+  def keypad(), do: Server.invoke(:keypad)
 
-  def start_color(), do:  Server.invoke(:start_color)
-  def has_colors(), do:  Server.invoke(:has_colors)
-  def init_pair(pair, f, b), do:  Server.invoke(:init_pair, {pair, f, b})
-  def attron(pair), do:  Server.invoke(:attron, {pair})
-  def attroff(pair), do:  Server.invoke(:attroff, {pair})
+  def start_color(), do: Server.invoke(:start_color)
+  def has_colors(), do: Server.invoke(:has_colors)
+  def init_pair(pair, f, b), do: Server.invoke(:init_pair, {pair, f, b})
+  def attron(pair), do: Server.invoke(:attron, {pair})
+  def attroff(pair), do: Server.invoke(:attroff, {pair})
 
-  def getch(), do:  {:error, :not_supported_yet}
-  def cols(), do:  Server.invoke(:cols)
-  def lines(), do:  Server.invoke(:lines)
+  def getch(), do: {:error, :not_supported_yet}
+  def cols(), do: Server.invoke(:cols)
+  def lines(), do: Server.invoke(:lines)
 
   def getchar() do
     do_getchar(getch())

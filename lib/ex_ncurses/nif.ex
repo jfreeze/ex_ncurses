@@ -5,7 +5,7 @@ defmodule ExNcurses.Nif do
   @moduledoc false
 
   def load_nif() do
-    Application.app_dir(:ex_ncurses, "priv/ncurses_nif")
+    Application.app_dir(:ex_ncurses, "priv/ex_ncurses")
     |> to_charlist
     |> :erlang.load_nif(0)
   end
