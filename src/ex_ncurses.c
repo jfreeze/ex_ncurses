@@ -119,7 +119,7 @@ ex_printw(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         return enif_make_badarg(env);
 
     char *str = alloc_and_copy_to_cstring(&string);
-    int code  = printw(str);
+    int code  = printw("%s", str);
     free_cstring(str);
 
     return done(env, code);
