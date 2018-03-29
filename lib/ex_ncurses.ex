@@ -77,6 +77,7 @@ defmodule ExNcurses do
 
   def flushinp(), do: Server.invoke(:flushinp)
   def keypad(), do: Server.invoke(:keypad)
+  def scrollok(), do: Server.invoke(:scrollok)
 
   def start_color(), do: Server.invoke(:start_color)
   def has_colors(), do: Server.invoke(:has_colors)

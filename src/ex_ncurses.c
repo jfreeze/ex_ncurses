@@ -178,6 +178,13 @@ ex_keypad(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_scrollok(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    int code = scrollok(stdscr,TRUE);
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
 ex_start_color(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int code = start_color();
@@ -373,6 +380,7 @@ static ErlNifFunc invoke_funcs[] = {
 
     {"flushinp",     0, ex_flushinp,   0},
     {"keypad",       0, ex_keypad,     0},
+    {"scrollok",     0, ex_scrollok,   0},
     {"getch",        0, ex_getch,      0},
 
     {"start_color",  0, ex_start_color, 0},
