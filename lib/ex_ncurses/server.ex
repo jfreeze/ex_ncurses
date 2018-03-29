@@ -35,7 +35,7 @@ defmodule ExNcurses.Server do
   end
 
   def handle_call(:stop_listening, _from, state) do
-    {:reply, Nif.poll(), %{state | pid: nil}}
+    {:reply, Nif.stop(), %{state | pid: nil}}
   end
 
   def handle_info({:select, _res, _ref, :ready_input}, state) do
