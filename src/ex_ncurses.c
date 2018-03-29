@@ -142,7 +142,6 @@ ex_mvprintw(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     char *str = alloc_and_copy_to_cstring(&string);
 
     int code  = mvprintw(y, x, "%s", str);
-enif_fprintf(stderr, "ex_mvprintw(%d, %d, %s) -> %d\n", y, x, str, code);
     free_cstring(str);
 
     return done(env, code);
@@ -206,8 +205,6 @@ ex_init_pair(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     if (! enif_get_int(env, argv[2], &b))
       return enif_make_badarg(env);
-
-enif_fprintf(stderr, "init_pair(%d, %d, %d)\n", pair, f, b);
 
 	  int code = init_pair(pair, f, b);
 

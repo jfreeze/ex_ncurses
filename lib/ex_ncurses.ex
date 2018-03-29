@@ -64,22 +64,24 @@ defmodule ExNcurses do
 
   def getch() do
     listen()
+
     c =
       receive do
         {:ex_ncurses, :key, key} -> key
       end
+
     stop_listening()
     c
   end
 
   # not implemented in nif
-  #def getstr(), do: do_getstr([], getx(), getchar())
+  # def getstr(), do: do_getstr([], getx(), getchar())
 
-  #defp do_getstr(str, _x, 10) do
+  # defp do_getstr(str, _x, 10) do
   #  String.reverse(List.to_string(['\n' | str]))
-  #end
+  # end
 
-  #defp do_getstr(str, x, chr) do
+  # defp do_getstr(str, x, chr) do
   #  case chr do
   #    127 ->
   #      handle_delete(x)
@@ -92,7 +94,7 @@ defmodule ExNcurses do
   #    _ ->
   #      do_getstr([chr | str], x, getchar())
   #  end
-  #end
+  # end
 
   # Common initialization
   def n_begin() do
