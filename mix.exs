@@ -38,7 +38,8 @@ defmodule ExNcurses.MixProject do
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
-    [{:elixir_make, "~> 0.4", runtime: false}, {:ex_doc, "~> 0.11", only: :dev}]
+    [{:elixir_make, "~> 0.4", runtime: false},
+     {:ex_doc, "~> 0.11", only: :dev, runtime: false}]
   end
 
   defp package() do

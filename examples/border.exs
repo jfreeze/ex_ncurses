@@ -1,3 +1,5 @@
+Application.ensure_started(:ex_ncurses)
+
 defmodule Border do
   @moduledoc """
   Replica of border.c in sample_csrc directory

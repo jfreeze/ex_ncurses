@@ -59,55 +59,40 @@ defmodule ExNcurses do
   def attron(pair), do: Server.invoke(:attron, {pair})
   def attroff(pair), do: Server.invoke(:attroff, {pair})
 
-  def getch(), do: {:error, :not_supported_yet}
   def cols(), do: Server.invoke(:cols)
   def lines(), do: Server.invoke(:lines)
 
-  def getchar() do
-    do_getchar(getch())
+  def getch() do
+    listen()
+    c =
+      receive do
+        {:ex_ncurses, :key, key} -> key
+      end
+    stop_listening()
+    c
   end
-
-  defp do_getchar(-1), do: getchar()
-  defp do_getchar(c), do: c
 
   # not implemented in nif
-  def getstr(), do: do_getstr([], getx(), getchar())
+  #def getstr(), do: do_getstr([], getx(), getchar())
 
-  defp do_getstr(str, _x, 10) do
-    String.reverse(List.to_string(['\n' | str]))
-  end
+  #defp do_getstr(str, _x, 10) do
+  #  String.reverse(List.to_string(['\n' | str]))
+  #end
 
-  defp do_getstr(str, x, chr) do
-    case chr do
-      127 ->
-        handle_delete(x)
-        [_h | t] = str
-        do_getstr(t, x, getchar())
-
-      -1 ->
-        do_getstr(str, x, getchar())
-
-      _ ->
-        do_getstr([chr | str], x, getchar())
-    end
-  end
-
-  # Simple minded positioning. Does not account for line wrap.
-  defp handle_delete(x) do
-    cx = getx()
-    cy = gety()
-    nx = max(x, cx - 1)
-    # remove ?
-    mvprintw(cy, nx, " ")
-    nx = max(x, nx - 1)
-    # remove ^
-    mvprintw(cy, nx, " ")
-    nx = max(x, nx - 1)
-    # remove <char>
-    mvprintw(cy, nx, " ")
-    # move not implemented
-    mvprintw(cy, nx, "")
-  end
+  #defp do_getstr(str, x, chr) do
+  #  case chr do
+  #    127 ->
+  #      handle_delete(x)
+  #      [_h | t] = str
+  #      do_getstr(t, x, getchar())
+  #
+  #    -1 ->
+  #      do_getstr(str, x, getchar())
+  #
+  #    _ ->
+  #      do_getstr([chr | str], x, getchar())
+  #  end
+  #end
 
   # Common initialization
   def n_begin() do
@@ -122,4 +107,5 @@ defmodule ExNcurses do
   end
 
   defdelegate listen(), to: Server
+  defdelegate stop_listening(), to: Server
 end

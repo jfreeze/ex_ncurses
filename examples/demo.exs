@@ -1,3 +1,5 @@
+Application.start(:ex_ncurses)
+
 defmodule Demo do
 
   def run do
@@ -53,7 +55,7 @@ defmodule Demo do
 
     ExNcurses.keypad()   # accept Function keys
     ExNcurses.flushinp() # clear input
-    char = ExNcurses.getchar()
+    char = ExNcurses.getch()
     ExNcurses.mvprintw(y+1, x, "You entered '#{char}'\n")
     # F1 exits
     if char != ExNcurses.fun(:F1), do: sample_2a()
@@ -67,7 +69,7 @@ defmodule Demo do
     #print the message at the center of the screen
     str = ExNcurses.getstr()
     ExNcurses.mvprintw(row - 2, 0, "You Entered: #{inspect str}")
-    ExNcurses.getchar()
+    ExNcurses.getch()
   end
 end
 

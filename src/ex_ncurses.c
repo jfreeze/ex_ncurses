@@ -130,18 +130,19 @@ ex_mvprintw(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     unsigned int x, y;
     ErlNifBinary string;
 
-    if (! enif_get_uint(env, argv[0], &y))
+    if (!enif_get_uint(env, argv[0], &y))
       return enif_make_badarg(env);
 
-    if (! enif_get_uint(env, argv[1], &x))
+    if (!enif_get_uint(env, argv[1], &x))
       return enif_make_badarg(env);
 
-    if (! enif_inspect_binary(env, argv[2], &string))
+    if (!enif_inspect_binary(env, argv[2], &string))
       return enif_make_badarg(env);
 
     char *str = alloc_and_copy_to_cstring(&string);
 
-    int code  = mvprintw(y, x, str);
+    int code  = mvprintw(y, x, "%s", str);
+enif_fprintf(stderr, "ex_mvprintw(%d, %d, %s) -> %d\n", y, x, str, code);
     free_cstring(str);
 
     return done(env, code);
@@ -164,19 +165,9 @@ ex_flushinp(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 static ERL_NIF_TERM
 ex_getch(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-    timeout(1);
     int code = getch();
-
     return done_with_value(env, code);
 }
-
-/*
-  // This is implemented in ex_ncurses.ex
-static ERL_NIF_TERM
-ex_getstr(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-}
-*/
 
 static ERL_NIF_TERM
 ex_keypad(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
@@ -215,6 +206,8 @@ ex_init_pair(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     if (! enif_get_int(env, argv[2], &b))
       return enif_make_badarg(env);
+
+enif_fprintf(stderr, "init_pair(%d, %d, %d)\n", pair, f, b);
 
 	  int code = init_pair(pair, f, b);
 
