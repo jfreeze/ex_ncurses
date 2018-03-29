@@ -11,7 +11,8 @@ defmodule ExNcurses.MixProject do
       deps: deps(),
       compilers: [:elixir_make | Mix.compilers()],
       make_clean: ["clean"],
-      make_env: make_env()
+      make_env: make_env(),
+      aliases: [format: ["format", &format_c/1]]
     ]
   end
 
@@ -48,4 +49,16 @@ defmodule ExNcurses.MixProject do
       links: %{"GitHub" => "https://github.com/jfreeze/ex_ncurses"}
     ]
   end
+
+  defp format_c([]) do
+    astyle =
+      System.find_executable("astyle") ||
+        Mix.raise("""
+        Could not format C code since astyle is not available.
+        """)
+
+    System.cmd(astyle, ["-n", "-r", "src/*.c"], into: IO.stream(:stdio, :line))
+  end
+
+  defp format_c(_args), do: true
 end
