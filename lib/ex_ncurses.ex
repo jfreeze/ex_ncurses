@@ -1,5 +1,5 @@
 defmodule ExNcurses do
-  alias ExNcurses.Server
+  alias ExNcurses.{Getstr, Server}
 
   @moduledoc """
   ExNcurses lets Elixir programs create text-based user interfaces using ncurses.
@@ -60,6 +60,9 @@ defmodule ExNcurses do
   def printw(s), do: Server.invoke(:printw, {s})
   def mvprintw(y, x, s), do: Server.invoke(:mvprintw, {y, x, s})
 
+  def mvcur(oldrow, oldcol, newrow, newcol),
+    do: Server.invoke(:mvcur, {oldrow, oldcol, newrow, newcol})
+
   @doc """
   Refresh the display.
   """
@@ -105,27 +108,32 @@ defmodule ExNcurses do
     c
   end
 
-  # not implemented in nif
-  # def getstr(), do: do_getstr([], getx(), getchar())
+  @doc """
+  Poll for a string.
+  """
+  def getstr() do
+    listen()
 
-  # defp do_getstr(str, _x, 10) do
-  #  String.reverse(List.to_string(['\n' | str]))
-  # end
+    noecho()
 
-  # defp do_getstr(str, x, chr) do
-  #  case chr do
-  #    127 ->
-  #      handle_delete(x)
-  #      [_h | t] = str
-  #      do_getstr(t, x, getchar())
-  #
-  #    -1 ->
-  #      do_getstr(str, x, getchar())
-  #
-  #    _ ->
-  #      do_getstr([chr | str], x, getchar())
-  #  end
-  # end
+    str = getstr_loop(Getstr.init(gety(), getx(), 60))
+
+    stop_listening()
+    str
+  end
+
+  defp getstr_loop(state) do
+    receive do
+      {:ex_ncurses, :key, key} ->
+        case Getstr.process(state, key) do
+          {:done, str} ->
+            str
+
+          {:not_done, new_state} ->
+            getstr_loop(new_state)
+        end
+    end
+  end
 
   # Common initialization
   def n_begin() do

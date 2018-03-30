@@ -174,8 +174,8 @@ ex_mvprintw(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     ErlNifBinary string;
 
     if (!enif_get_uint(env, argv[0], &y) ||
-        !enif_get_uint(env, argv[1], &x) ||
-        !enif_inspect_binary(env, argv[2], &string))
+            !enif_get_uint(env, argv[1], &x) ||
+            !enif_inspect_binary(env, argv[2], &string))
         return enif_make_badarg(env);
 
     char *str = alloc_and_copy_to_cstring(&string);
@@ -242,11 +242,26 @@ ex_init_pair(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int pair, f, b;
     if (!enif_get_int(env, argv[0], &pair) ||
-        !enif_get_int(env, argv[1], &f) ||
-        !enif_get_int(env, argv[2], &b))
+            !enif_get_int(env, argv[1], &f) ||
+            !enif_get_int(env, argv[2], &b))
         return enif_make_badarg(env);
 
     int code = init_pair(pair, f, b);
+
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
+ex_mvcur(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    int oldrow, oldcol, newrow, newcol;
+    if (!enif_get_int(env, argv[0], &oldrow) ||
+            !enif_get_int(env, argv[1], &oldcol) ||
+            !enif_get_int(env, argv[1], &newrow) ||
+            !enif_get_int(env, argv[2], &newcol))
+        return enif_make_badarg(env);
+
+    int code = mvcur(oldrow, oldcol, newrow, newcol);
 
     return done(env, code);
 }
@@ -391,7 +406,7 @@ ex_read(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     if (data->polling) {
         int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_READ, data->resource, NULL,
-                         data->atom_undefined);
+                             data->atom_undefined);
         if (rc < 0)
             return make_error(env, "enif_select");
     }
@@ -444,6 +459,8 @@ static ErlNifFunc invoke_funcs[] = {
     {"keypad",       0, ex_keypad,     0},
     {"scrollok",     0, ex_scrollok,   0},
     {"getch",        0, ex_getch,      0},
+    {"mvcur",        4, ex_mvcur,      0},
+
 
     {"start_color",  0, ex_start_color, 0},
     {"has_colors",   0, ex_has_colors, 0},
