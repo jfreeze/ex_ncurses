@@ -303,13 +303,13 @@ ex_lines(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
 static void rt_dtor(ErlNifEnv *env, void *obj)
 {
-    enif_fprintf(stderr, "rt_dtor called\r\n");
+    //enif_fprintf(stderr, "rt_dtor called\r\n");
 }
 
 static void rt_stop(ErlNifEnv *env, void *obj, int fd, int is_direct_call)
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
-    enif_fprintf(stderr, "rt_stop called %s, polling=%d\r\n", (is_direct_call ? "DIRECT" : "LATER"), data->polling);
+    //enif_fprintf(stderr, "rt_stop called %s, polling=%d\r\n", (is_direct_call ? "DIRECT" : "LATER"), data->polling);
     if (data->polling && is_direct_call) {
         enif_select(env, STDIN_FILENO, ERL_NIF_SELECT_STOP, obj, NULL, data->atom_undefined);
         data->polling = false;
@@ -318,7 +318,7 @@ static void rt_stop(ErlNifEnv *env, void *obj, int fd, int is_direct_call)
 
 static void rt_down(ErlNifEnv *env, void *obj, ErlNifPid *pid, ErlNifMonitor *monitor)
 {
-    enif_fprintf(stderr, "rt_down called\r\n");
+    //enif_fprintf(stderr, "rt_down called\r\n");
 
     struct ex_ncurses_priv *data = enif_priv_data(env);
     if (data->polling) {
@@ -407,7 +407,7 @@ ex_stop(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         return make_error(env, "uninitialized");
 
     if (data->polling) {
-        enif_fprintf(stderr, "ex_stop called\r\n");
+        //enif_fprintf(stderr, "ex_stop called\r\n");
         data->polling = false;
         int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_STOP, data->resource, NULL,
                              data->atom_undefined);
