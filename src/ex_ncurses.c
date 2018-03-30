@@ -2,6 +2,7 @@
 #include <ncurses.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 struct ex_ncurses_priv {
     ERL_NIF_TERM atom_ok;
@@ -10,7 +11,10 @@ struct ex_ncurses_priv {
     ErlNifResourceType *rt;
     void *resource;
 
-    int ncurses_initialized;
+    int stdin_fd;
+    FILE *stdin_fp;
+
+    bool ncurses_initialized;
 };
 
 static char *
@@ -55,8 +59,35 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
     if (!data->ncurses_initialized) {
-        initscr();
-        data->ncurses_initialized = 1;
+        // To avoid interfering with Erlang's tty_sl driver, we
+        // duplicate the stdin filehandle and use that one instead.
+        // Since we don't want Erlang to handle input anymore, we
+        // replace STDIN_FILENO with /dev/null.
+        data->stdin_fd = dup(STDIN_FILENO);
+        if (data->stdin_fd <= 0) {
+            enif_fprintf(stderr, "Error dup'ing stdin\n");
+            return make_error(env, "dup");
+        }
+        int nulfd = open("/dev/null", O_RDONLY);
+        if (nulfd <= 0) {
+            enif_fprintf(stderr, "Error opening /dev/null or got fd 0 somehow\n");
+            close(data->stdin_fd);
+            return make_error(env, "open");
+        }
+        close(STDIN_FILENO);
+        int rc = dup2(nulfd, STDIN_FILENO);
+        if (rc != STDIN_FILENO) {
+            enif_fprintf(stderr, "Error replacing stdin\n");
+            return make_error(env, "dup2");
+        }
+        close(nulfd);
+
+        data->stdin_fp = fdopen(data->stdin_fd, "r");
+
+        // initscr invokes newterm insternally. Update it with
+        // our new "stdin"
+        newterm(getenv("TERM"), stdout, data->stdin_fp);
+        data->ncurses_initialized = true;
     }
 
     return data->atom_ok;
@@ -69,7 +100,16 @@ ex_endwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     int code = 0;
     if (data->ncurses_initialized) {
         code = endwin(); /* End curses mode  */
-        data->ncurses_initialized = 0;
+
+        // Undo our manipulation of filehandles from initscr
+        close(STDIN_FILENO);
+        dup2(data->stdin_fd, STDIN_FILENO);
+
+        fclose(data->stdin_fp); // This also closes data->stdin_fd
+        data->stdin_fd = -1;
+        data->stdin_fp = NULL;
+
+        data->ncurses_initialized = false;
     }
 
     return done(env, code);
@@ -283,9 +323,8 @@ static void rt_down(ErlNifEnv *env, void *obj, ErlNifPid *pid, ErlNifMonitor *mo
 {
     enif_fprintf(stderr, "rt_down called\r\n");
 
-    ERL_NIF_TERM undefined;
-    enif_make_existing_atom(env, "undefined", &undefined, ERL_NIF_LATIN1);
-    enif_select(env, STDIN_FILENO, ERL_NIF_SELECT_STOP, obj, NULL, undefined);
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    enif_select(env, data->stdin_fd, ERL_NIF_SELECT_STOP, obj, NULL, data->atom_undefined);
 }
 
 static ErlNifResourceTypeInit rt_init = {rt_dtor, rt_stop, rt_down};
@@ -302,7 +341,8 @@ static int load(ErlNifEnv *env, void **priv, ERL_NIF_TERM info)
     data->rt = enif_open_resource_type_x(env, "monitor", &rt_init, ERL_NIF_RT_CREATE, NULL);
     data->resource = enif_alloc_resource(data->rt, sizeof(int));
 
-    data->ncurses_initialized = 0;
+    data->ncurses_initialized = false;
+    data->stdin_fd = -1;
 
     *priv = (void *) data;
 
@@ -321,7 +361,7 @@ ex_poll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!data->ncurses_initialized)
         return make_error(env, "uninitialized");
 
-    int rc = enif_select(env, STDIN_FILENO, ERL_NIF_SELECT_READ, data->resource, NULL,
+    int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_READ, data->resource, NULL,
                          data->atom_undefined);
     return rc >= 0 ? data->atom_ok : make_error(env, "enif_select");
 }
@@ -339,7 +379,7 @@ ex_read(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         return make_error(env, "getch");
     }
 
-    int rc = enif_select(env, STDIN_FILENO, ERL_NIF_SELECT_READ, data->resource, NULL,
+    int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_READ, data->resource, NULL,
                          data->atom_undefined);
     return rc >= 0 ? enif_make_int(env, code) : make_error(env, "enif_select");
 }
@@ -351,7 +391,7 @@ ex_stop(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!data->ncurses_initialized)
         return make_error(env, "uninitialized");
 
-    int rc = enif_select(env, STDIN_FILENO, ERL_NIF_SELECT_STOP, data->resource, NULL,
+    int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_STOP, data->resource, NULL,
                          data->atom_undefined);
     return rc >= 0 ? data->atom_ok : make_error(env, "enif_select");
 }
