@@ -15,6 +15,7 @@ struct ex_ncurses_priv {
     FILE *stdin_fp;
 
     bool ncurses_initialized;
+    bool polling;
 };
 
 static char *
@@ -87,6 +88,7 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         // initscr invokes newterm insternally. Update it with
         // our new "stdin"
         newterm(getenv("TERM"), stdout, data->stdin_fp);
+
         data->ncurses_initialized = true;
     }
 
@@ -171,13 +173,9 @@ ex_mvprintw(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     unsigned int x, y;
     ErlNifBinary string;
 
-    if (!enif_get_uint(env, argv[0], &y))
-        return enif_make_badarg(env);
-
-    if (!enif_get_uint(env, argv[1], &x))
-        return enif_make_badarg(env);
-
-    if (!enif_inspect_binary(env, argv[2], &string))
+    if (!enif_get_uint(env, argv[0], &y) ||
+        !enif_get_uint(env, argv[1], &x) ||
+        !enif_inspect_binary(env, argv[2], &string))
         return enif_make_badarg(env);
 
     char *str = alloc_and_copy_to_cstring(&string);
@@ -212,7 +210,6 @@ ex_getch(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 static ERL_NIF_TERM
 ex_keypad(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
-    // keypad() => keypad(stdscr, TRUE);
     int code = keypad(stdscr, TRUE);
     return done(env, code);
 }
@@ -220,7 +217,7 @@ ex_keypad(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 static ERL_NIF_TERM
 ex_scrollok(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
-    int code = scrollok(stdscr,TRUE);
+    int code = scrollok(stdscr, TRUE);
     return done(env, code);
 }
 
@@ -244,14 +241,9 @@ static ERL_NIF_TERM
 ex_init_pair(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int pair, f, b;
-
-    if (! enif_get_int(env, argv[0], &pair))
-        return enif_make_badarg(env);
-
-    if (! enif_get_int(env, argv[1], &f))
-        return enif_make_badarg(env);
-
-    if (! enif_get_int(env, argv[2], &b))
+    if (!enif_get_int(env, argv[0], &pair) ||
+        !enif_get_int(env, argv[1], &f) ||
+        !enif_get_int(env, argv[2], &b))
         return enif_make_badarg(env);
 
     int code = init_pair(pair, f, b);
@@ -316,7 +308,12 @@ static void rt_dtor(ErlNifEnv *env, void *obj)
 
 static void rt_stop(ErlNifEnv *env, void *obj, int fd, int is_direct_call)
 {
-    enif_fprintf(stderr, "rt_stop called %s\r\n", (is_direct_call ? "DIRECT" : "LATER"));
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    enif_fprintf(stderr, "rt_stop called %s, polling=%d\r\n", (is_direct_call ? "DIRECT" : "LATER"), data->polling);
+    if (data->polling && is_direct_call) {
+        enif_select(env, STDIN_FILENO, ERL_NIF_SELECT_STOP, obj, NULL, data->atom_undefined);
+        data->polling = false;
+    }
 }
 
 static void rt_down(ErlNifEnv *env, void *obj, ErlNifPid *pid, ErlNifMonitor *monitor)
@@ -324,7 +321,10 @@ static void rt_down(ErlNifEnv *env, void *obj, ErlNifPid *pid, ErlNifMonitor *mo
     enif_fprintf(stderr, "rt_down called\r\n");
 
     struct ex_ncurses_priv *data = enif_priv_data(env);
-    enif_select(env, data->stdin_fd, ERL_NIF_SELECT_STOP, obj, NULL, data->atom_undefined);
+    if (data->polling) {
+        enif_select(env, data->stdin_fd, ERL_NIF_SELECT_STOP, obj, NULL, data->atom_undefined);
+        data->polling = false;
+    }
 }
 
 static ErlNifResourceTypeInit rt_init = {rt_dtor, rt_stop, rt_down};
@@ -342,7 +342,10 @@ static int load(ErlNifEnv *env, void **priv, ERL_NIF_TERM info)
     data->resource = enif_alloc_resource(data->rt, sizeof(int));
 
     data->ncurses_initialized = false;
+    data->polling = false;
+
     data->stdin_fd = -1;
+    data->stdin_fp = NULL;
 
     *priv = (void *) data;
 
@@ -360,10 +363,17 @@ ex_poll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     struct ex_ncurses_priv *data = enif_priv_data(env);
     if (!data->ncurses_initialized)
         return make_error(env, "uninitialized");
+    if (data->polling)
+        return data->atom_ok;
 
     int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_READ, data->resource, NULL,
                          data->atom_undefined);
-    return rc >= 0 ? data->atom_ok : make_error(env, "enif_select");
+    if (rc >= 0) {
+        data->polling = true;
+        return data->atom_ok;
+    } else {
+        return make_error(env, "enif_select");
+    }
 }
 
 static ERL_NIF_TERM
@@ -379,9 +389,14 @@ ex_read(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         return make_error(env, "getch");
     }
 
-    int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_READ, data->resource, NULL,
+    if (data->polling) {
+        int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_READ, data->resource, NULL,
                          data->atom_undefined);
-    return rc >= 0 ? enif_make_int(env, code) : make_error(env, "enif_select");
+        if (rc < 0)
+            return make_error(env, "enif_select");
+    }
+
+    return enif_make_int(env, code);
 }
 
 static ERL_NIF_TERM
@@ -391,9 +406,16 @@ ex_stop(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!data->ncurses_initialized)
         return make_error(env, "uninitialized");
 
-    int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_STOP, data->resource, NULL,
-                         data->atom_undefined);
-    return rc >= 0 ? data->atom_ok : make_error(env, "enif_select");
+    if (data->polling) {
+        enif_fprintf(stderr, "ex_stop called\r\n");
+        data->polling = false;
+        int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_STOP, data->resource, NULL,
+                             data->atom_undefined);
+        if (rc < 0)
+            return make_error(env, "enif_select");
+    }
+
+    return data->atom_ok;
 }
 
 static ErlNifFunc invoke_funcs[] = {
