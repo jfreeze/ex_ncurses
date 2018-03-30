@@ -58,7 +58,9 @@ defmodule ExNcurses do
   @doc """
   """
   def printw(s), do: Server.invoke(:printw, {s})
+  def addstr(s), do: Server.invoke(:addstr, {s})
   def mvprintw(y, x, s), do: Server.invoke(:mvprintw, {y, x, s})
+  def mvaddstr(y, x, s), do: Server.invoke(:mvaddstr, {y, x, s})
 
   def mvcur(oldrow, oldcol, newrow, newcol),
     do: Server.invoke(:mvcur, {oldrow, oldcol, newrow, newcol})

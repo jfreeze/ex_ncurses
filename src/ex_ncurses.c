@@ -18,20 +18,6 @@ struct ex_ncurses_priv {
     bool polling;
 };
 
-static char *
-alloc_and_copy_to_cstring(ErlNifBinary *string)
-{
-    char *str = (char *) enif_alloc(string->size + 1);
-    strncpy(str, (char *)string->data, string->size);
-    str[string->size] = 0;
-    return str;
-}
-
-static void free_cstring(char *str)
-{
-    enif_free(str);
-}
-
 static ERL_NIF_TERM make_error(ErlNifEnv *env, const char *error)
 {
     return enif_make_tuple2(env, enif_make_atom(env, "error"), enif_make_atom(env, error));
@@ -160,10 +146,9 @@ ex_printw(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!enif_inspect_binary(env, argv[0], &string))
         return enif_make_badarg(env);
 
-    char *str = alloc_and_copy_to_cstring(&string);
-    int code  = printw("%s", str);
-    free_cstring(str);
-
+    // printw is the same as addstr since there's no way of passing
+    // printf-formatted strings from Elixir
+    int code = addnstr((const char *) string.data, string.size);
     return done(env, code);
 }
 
@@ -178,11 +163,7 @@ ex_mvprintw(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
             !enif_inspect_binary(env, argv[2], &string))
         return enif_make_badarg(env);
 
-    char *str = alloc_and_copy_to_cstring(&string);
-
-    int code  = mvprintw(y, x, "%s", str);
-    free_cstring(str);
-
+    int code = mvaddnstr(y, x, (const char *) string.data, string.size);
     return done(env, code);
 }
 
@@ -448,7 +429,10 @@ static ErlNifFunc invoke_funcs[] = {
     {"noecho",       0, ex_noecho,     0},
 
     {"printw",       1, ex_printw,     0},
+    {"addstr",       1, ex_printw,     0},
+
     {"mvprintw",     3, ex_mvprintw,   0},
+    {"mvaddstr",     3, ex_mvprintw,   0},
 
     {"cols",         0, ex_cols,       0},
     {"lines",        0, ex_lines,      0},
