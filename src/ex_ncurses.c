@@ -272,6 +272,21 @@ ex_attroff(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_border(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    // Use the defaults
+    chtype ls = 0;
+    chtype rs = 0;
+    chtype ts = 0;
+    chtype bs = 0;
+    chtype tl = 0;
+    chtype tr = 0;
+    chtype bl = 0;
+    chtype br = 0;
+    return done(env, border(ls, rs, ts, bs, tl, tr, bl, br));
+}
+
+static ERL_NIF_TERM
 ex_gety(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int y = getcury(stdscr);
@@ -450,7 +465,9 @@ static ErlNifFunc invoke_funcs[] = {
     {"has_colors",   0, ex_has_colors, 0},
     {"init_pair",    3, ex_init_pair,  0},
     {"attron",       1, ex_attron,     0},
-    {"attroff",      1, ex_attroff,    0}
+    {"attroff",      1, ex_attroff,    0},
+
+    {"border",       0, ex_border,     0}
 };
 
 static ERL_NIF_TERM
@@ -470,7 +487,7 @@ ex_invoke(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     for (size_t i = 0; i < sizeof(invoke_funcs) / sizeof(ErlNifFunc); i++) {
         if (strcmp(invoke_funcs[i].name, name) == 0 &&
-                invoke_funcs[i].arity == (unsigned) arity) {
+                invoke_funcs[i].arity <= (unsigned) arity) {
             return invoke_funcs[i].fptr(env, arity, array);
         }
     }
