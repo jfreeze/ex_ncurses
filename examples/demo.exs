@@ -34,7 +34,7 @@ defmodule Demo do
   end
 
   def sample_2 do
-    welcome = "Running ExExNcurses Sample 2"
+    welcome = "Running ExNcurses Sample 2"
 
     ExNcurses.mvprintw(
       div(ExNcurses.lines(), 2),
@@ -66,6 +66,7 @@ defmodule Demo do
     ExNcurses.flushinp()
     char = ExNcurses.getch()
     ExNcurses.mvprintw(y + 1, x, "You entered '#{char}'\n")
+    ExNcurses.refresh()
     # F1 exits
     if char != ExNcurses.fun(:F1), do: sample_2a()
   end
@@ -79,6 +80,7 @@ defmodule Demo do
 
     str = ExNcurses.getstr()
     ExNcurses.mvprintw(row - 2, 0, "You Entered: #{inspect(str)}")
+    ExNcurses.refresh()
     ExNcurses.getch()
   end
 end
