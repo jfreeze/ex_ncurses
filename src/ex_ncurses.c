@@ -456,6 +456,44 @@ ex_scrollok(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 static ERL_NIF_TERM
 ex_waddstr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    struct ex_window *obj;
+    ErlNifBinary string;
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj) ||
+        !enif_inspect_binary(env, argv[1], &string))
+        return enif_make_badarg(env);
+
+    // printw is the same as addstr since there's no way of passing
+    // printf-formatted strings from Elixir
+    int code = waddnstr(obj->win, (const char *) string.data, string.size);
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
+ex_wmove(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    struct ex_window *obj;
+    int y, x;
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj) ||
+        !enif_get_int(env, argv[1], &y)||
+        !enif_get_int(env, argv[2], &x))
+        return enif_make_badarg(env);
+
+    int code = wmove(obj->win, x, y);
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
+ex_move(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    int y, x;
+    if (!enif_get_int(env, argv[0], &y) ||
+        !enif_get_int(env, argv[1], &x))
+        return enif_make_badarg(env);
+
+    int code = move(x, y);
+    return done(env, code);
 }
 
 static ERL_NIF_TERM
@@ -520,49 +558,38 @@ ex_stop(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ErlNifFunc invoke_funcs[] = {
-    {"initscr",      0, ex_initscr,    0},
-    {"endwin",       0, ex_endwin,     0},
-
-    {"clear",        0, ex_clear,      0},
-    {"refresh",      0, ex_refresh,    0},
-
-    {"raw",          0, ex_raw,        0},
-
-    {"cbreak",       0, ex_cbreak,     0},
-    {"nocbreak",     0, ex_nocbreak,   0},
-
-    {"noecho",       0, ex_noecho,     0},
-
-    {"setscrreg",    2, ex_setscrreg,  0},
-
-    {"printw",       1, ex_printw,     0},
     {"addstr",       1, ex_printw,     0},
-
-    {"mvprintw",     3, ex_mvprintw,   0},
-    {"mvaddstr",     3, ex_mvprintw,   0},
-
-    {"newwin",       4, ex_newwin,     0},
-
-    {"cols",         0, ex_cols,       0},
-    {"lines",        0, ex_lines,      0},
-    {"getx",         0, ex_getx,       0},
-    {"gety",         0, ex_gety,       0},
-
-    {"flushinp",     0, ex_flushinp,   0},
-    {"keypad",       0, ex_keypad,     0},
-    {"scrollok",     0, ex_scrollok,   0},
-    {"getch",        0, ex_getch,      0},
-    {"mvcur",        4, ex_mvcur,      0},
-
-    {"waddstr",      1, ex_waddstr,    0},
-
-    {"start_color",  0, ex_start_color, 0},
-    {"has_colors",   0, ex_has_colors, 0},
-    {"init_pair",    3, ex_init_pair,  0},
     {"attron",       1, ex_attron,     0},
     {"attroff",      1, ex_attroff,    0},
-
-    {"border",       0, ex_border,     0}
+    {"border",       0, ex_border,     0},
+    {"cbreak",       0, ex_cbreak,     0},
+    {"nocbreak",     0, ex_nocbreak,   0},
+    {"clear",        0, ex_clear,      0},
+    {"cols",         0, ex_cols,       0},
+    {"noecho",       0, ex_noecho,     0},
+    {"endwin",       0, ex_endwin,     0},
+    {"flushinp",     0, ex_flushinp,   0},
+    {"getch",        0, ex_getch,      0},
+    {"getx",         0, ex_getx,       0},
+    {"gety",         0, ex_gety,       0},
+    {"has_colors",   0, ex_has_colors, 0},
+    {"init_pair",    3, ex_init_pair,  0},
+    {"initscr",      0, ex_initscr,    0},
+    {"keypad",       0, ex_keypad,     0},
+    {"lines",        0, ex_lines,      0},
+    {"move",         2, ex_move,       0},
+    {"mvaddstr",     3, ex_mvprintw,   0},
+    {"mvcur",        4, ex_mvcur,      0},
+    {"mvprintw",     3, ex_mvprintw,   0},
+    {"newwin",       4, ex_newwin,     0},
+    {"printw",       1, ex_printw,     0},
+    {"raw",          0, ex_raw,        0},
+    {"refresh",      0, ex_refresh,    0},
+    {"scrollok",     0, ex_scrollok,   0},
+    {"setscrreg",    2, ex_setscrreg,  0},
+    {"start_color",  0, ex_start_color, 0},
+    {"waddstr",      1, ex_waddstr,    0},
+    {"wmove",        3, ex_wmove,      0}
 };
 
 static ERL_NIF_TERM

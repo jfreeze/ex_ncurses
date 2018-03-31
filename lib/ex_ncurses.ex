@@ -159,6 +159,12 @@ defmodule ExNcurses do
   @spec waddstr(window(), String.t()) :: :ok
   def waddstr(win, str), do: Server.invoke(:waddstr, {win, str})
 
+  @spec wmove(window(), non_neg_integer(), non_neg_integer()) :: :ok
+  def wmove(win, y, x), do: Server.invoke(:wmove, {win, y, x})
+
+  @spec move(non_neg_integer(), non_neg_integer()) :: :ok
+  def move(y, x), do: Server.invoke(:move, {y, x})
+
   @doc """
   Return the number of visible columns
   """
