@@ -143,7 +143,13 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
             close(data->stdin_fd);
             return make_error(env, "open");
         }
-        close(STDIN_FILENO);
+        // NOTE: dup2 automatically closes STDIN_FILENO before replacing it
+        //       so no need to call close. Unfortunately, if STDIN_FILENO is
+        //       in another Erlang thread's call to select(2), select will
+        //       return an error on the handle which will then get printed
+        //       to the console. It would be nice if initscr could be
+        //       guaranteed to be called from the thread servicing the
+        //       console, but I don't know how to do that. :(
         int rc = dup2(nulfd, STDIN_FILENO);
         if (rc != STDIN_FILENO) {
             enif_fprintf(stderr, "Error replacing stdin\n");
@@ -172,7 +178,7 @@ ex_endwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         code = endwin(); /* End curses mode  */
 
         // Undo our manipulation of filehandles from initscr
-        close(STDIN_FILENO);
+        // by dup'ing the real stdin back to STDIN_FILENO.
         dup2(data->stdin_fd, STDIN_FILENO);
 
         fclose(data->stdin_fp); // This also closes data->stdin_fd

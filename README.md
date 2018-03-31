@@ -56,3 +56,18 @@ a window.
 
 That's the ncurses way. Everything is row and then column, so y comes first. The
 upper left is (0, 0).
+
+### I get a bad input fd in erts_poll error sometimes
+
+When calling `initscr/0` from a `.exs` script, it's possible to get the
+following error message:
+
+```text
+16:37:59.313 [error] Bad input fd in erts_poll()! fd=0, port=#Port<0.635>, driver=fd, name=0/1
+```
+
+This is due to race condition when `ex_ncurses` takes over `stdin` from the
+Erlang console. There's some more info about this in `ex_ncurses.c`. If you're
+reading this and know how to fix it, please share your knowledge and post an
+issue. Otherwise, just run `ExNcurses.clear/0` in your script to obscure the
+message.
