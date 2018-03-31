@@ -52,4 +52,7 @@ To run any of the examples, start them by invoking the `run_example.sh` script:
 Try calling `ExNcurses.refresh/0` or `ExNcurses.wrefresh/1` if you're working in
 a window.
 
+### Hold up, x and y are swapped everywhere
 
+That's the ncurses way. Everything is row and then column, so y comes first. The
+upper left is (0, 0).

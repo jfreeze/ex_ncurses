@@ -436,9 +436,9 @@ ex_newwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int nlines, ncols, begin_y, begin_x;
     if (!enif_get_int(env, argv[0], &nlines) ||
-            !enif_get_int(env, argv[0], &ncols) ||
-            !enif_get_int(env, argv[0], &begin_y) ||
-            !enif_get_int(env, argv[0], &begin_x))
+            !enif_get_int(env, argv[1], &ncols) ||
+            !enif_get_int(env, argv[2], &begin_y) ||
+            !enif_get_int(env, argv[3], &begin_x))
         return enif_make_badarg(env);
 
     WINDOW *win = newwin(nlines, ncols, begin_y, begin_x);
@@ -512,7 +512,7 @@ ex_wmove(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
             !enif_get_int(env, argv[2], &x))
         return enif_make_badarg(env);
 
-    int code = wmove(obj->win, x, y);
+    int code = wmove(obj->win, y, x);
     return done(env, code);
 }
 
@@ -524,7 +524,7 @@ ex_move(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
             !enif_get_int(env, argv[1], &x))
         return enif_make_badarg(env);
 
-    int code = move(x, y);
+    int code = move(y, x);
     return done(env, code);
 }
 
