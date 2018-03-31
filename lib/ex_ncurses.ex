@@ -42,7 +42,7 @@ defmodule ExNcurses do
   TODO: Return stdscr (a window)
   """
   @spec initscr() :: :ok
-  def initscr(), do: Server.invoke(:initscr)
+  defdelegate initscr(), to: Server
 
   @doc """
   Stop using ncurses and clean the terminal back up.

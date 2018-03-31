@@ -1,7 +1,11 @@
 defmodule ExNcurses.Server do
   use GenServer
   alias ExNcurses.Nif
-  @moduledoc false
+
+  @moduledoc """
+  This module serializes access to the ncurses NIF to avoid race conditions and
+  handles enif_select notifications.
+  """
 
   defmodule State do
     @moduledoc false
@@ -10,6 +14,10 @@ defmodule ExNcurses.Server do
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
+  end
+
+  def initscr() do
+    GenServer.call(__MODULE__, :initscr)
   end
 
   def invoke(name, args \\ {}) do
@@ -26,6 +34,10 @@ defmodule ExNcurses.Server do
 
   def init(_args) do
     {:ok, %State{}}
+  end
+
+  def handle_call(:initscr, _from, state) do
+    {:reply, Nif.initscr(), state}
   end
 
   def handle_call({:invoke, name, args}, _from, state) do

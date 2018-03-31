@@ -10,6 +10,11 @@ defmodule ExNcurses.Nif do
   end
 
   @doc """
+  Initialize ncurses.
+  """
+  def initscr(), do: :erlang.nif_error(:nif_not_loaded)
+
+  @doc """
   Poll for events from ncurses. When an event is ready,
   {:select, _res, _ref, :ready_input} will be sent back and
   then `read/0` should be called to get the event.

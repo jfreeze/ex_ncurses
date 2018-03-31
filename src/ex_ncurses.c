@@ -173,20 +173,17 @@ static ERL_NIF_TERM
 ex_endwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
-    int code = 0;
-    if (data->ncurses_initialized) {
-        code = endwin(); /* End curses mode  */
+    int code = endwin();
 
-        // Undo our manipulation of filehandles from initscr
-        // by dup'ing the real stdin back to STDIN_FILENO.
-        dup2(data->stdin_fd, STDIN_FILENO);
+    // Undo our manipulation of filehandles from initscr
+    // by dup'ing the real stdin back to STDIN_FILENO.
+    dup2(data->stdin_fd, STDIN_FILENO);
 
-        fclose(data->stdin_fp); // This also closes data->stdin_fd
-        data->stdin_fd = -1;
-        data->stdin_fp = NULL;
+    fclose(data->stdin_fp); // This also closes data->stdin_fd
+    data->stdin_fd = -1;
+    data->stdin_fp = NULL;
 
-        data->ncurses_initialized = false;
-    }
+    data->ncurses_initialized = false;
 
     return done(env, code);
 }
@@ -624,7 +621,6 @@ static ErlNifFunc invoke_funcs[] = {
     {"gety",         0, ex_gety,       0},
     {"has_colors",   0, ex_has_colors, 0},
     {"init_pair",    3, ex_init_pair,  0},
-    {"initscr",      0, ex_initscr,    0},
     {"keypad",       0, ex_keypad,     0},
     {"lines",        0, ex_lines,      0},
     {"move",         2, ex_move,       0},
@@ -647,17 +643,19 @@ static ErlNifFunc invoke_funcs[] = {
 static ERL_NIF_TERM
 ex_invoke(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
-    if (argc != 2)
-        return enif_make_badarg(env);
-
     char name[16];
-    if (enif_get_atom(env, argv[0], name, sizeof(name), ERL_NIF_LATIN1) <= 0)
+    const ERL_NIF_TERM *array;
+    int arity;
+
+    if (argc != 2 ||
+            enif_get_atom(env, argv[0], name, sizeof(name), ERL_NIF_LATIN1) <= 0 ||
+            !enif_get_tuple(env, argv[1], &arity, &array))
         return enif_make_badarg(env);
 
-    int arity;
-    const ERL_NIF_TERM *array;
-    if (!enif_get_tuple(env, argv[1], &arity, &array))
-        return enif_make_badarg(env);
+    // Check that initscr has been called
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    if (!data->ncurses_initialized)
+        return make_error(env, "uninitialized");
 
     for (size_t i = 0; i < sizeof(invoke_funcs) / sizeof(ErlNifFunc); i++) {
         if (strcmp(invoke_funcs[i].name, name) == 0 &&
@@ -670,9 +668,10 @@ ex_invoke(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ErlNifFunc nif_funcs[] = {
+    {"initscr",   0, ex_initscr,    0},
+    {"invoke",    2, ex_invoke,  0},
     {"poll",      0, ex_poll,    0},
     {"read",      0, ex_read,  0},
-    {"invoke",    2, ex_invoke,  0},
     {"stop",      0, ex_stop,  0},
 };
 
