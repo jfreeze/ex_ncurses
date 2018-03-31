@@ -11,17 +11,12 @@ defmodule ExNcurses do
   * [The ncurses project page](https://www.gnu.org/software/ncurses/)
   * [opengroup.org](http://pubs.opengroup.org/onlinepubs/7908799/xcurses/curses.h.html)
   * [] for ncurses documentation.
-
-  NOTE: if you're using the IEx prompt, ExNcurses will quickly take it over. Calling `endwin/0`
-  will let you return the the IEx prompt. You may see some errors momentarily though when the
-  Erlang VM detects two uses of stdin.
   """
 
   @type pair :: non_neg_integer()
   @type color_name :: :black | :red | :green | :yellow | :blue | :magenta | :cyan | :white
   @type color :: 0..7 | color_name()
-  # Improve
-  @type window :: term()
+  @type window :: reference()
 
   def fun(:F1), do: 265
   def fun(:F2), do: 266
