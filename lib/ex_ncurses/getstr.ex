@@ -4,6 +4,7 @@ defmodule ExNcurses.Getstr do
   @doc """
   Initialize state for string entry
   """
+  @spec init(non_neg_integer(), non_neg_integer(), pos_integer()) :: %ExNcurses.Getstr{}
   def init(y, x, length) do
     %ExNcurses.Getstr{y: y, x: x, field_length: length}
   end
@@ -17,6 +18,7 @@ defmodule ExNcurses.Getstr do
   * `:cancelled` if the user presses ESCape
   * `{:not_done, state}` if more is coming
   """
+  @spec process(%ExNcurses.Getstr{}, non_neg_integer()) :: {:done, String.t()} | :cancelled | {:not_done, %ExNcurses.Getstr{}}
   def process(state, ?\n) do
     str =
       state.chars
@@ -25,6 +27,8 @@ defmodule ExNcurses.Getstr do
 
     {:done, str}
   end
+
+  def process(_state, 27), do: :cancelled
 
   def process(%{chars: []} = state, key) when key == 127 or key == 263 do
     {:not_done, state}

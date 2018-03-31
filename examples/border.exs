@@ -20,7 +20,7 @@ defmodule Border do
     # I need that nifty F1
     ExNcurses.keypad()
     ExNcurses.noecho()
-    ExNcurses.init_pair(1, ExNcurses.clr(:COLOR_CYAN), ExNcurses.clr(:COLOR_BLACK))
+    ExNcurses.init_pair(1, :cyan, :black)
 
     # 	/* Initialize the window parameters */
     # 	init_win_params(&win);

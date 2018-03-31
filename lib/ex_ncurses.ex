@@ -17,6 +17,11 @@ defmodule ExNcurses do
   Erlang VM detects two uses of stdin.
   """
 
+  @type pair :: non_neg_integer()
+  @type color_name :: :black | :red | :green | :yellow | :blue | :magenta | :cyan | :white
+  @type color :: 0..7 | color_name()
+  @type window :: term()  # Improve
+
   def fun(:F1), do: 265
   def fun(:F2), do: 266
   def fun(:F3), do: 267
@@ -30,77 +35,140 @@ defmodule ExNcurses do
   def fun(:F11), do: 275
   def fun(:F12), do: 276
 
-  # colors
-  def clr(:COLOR_BLACK), do: 0
-  def clr(:BLACK), do: 0
-  def clr(:COLOR_RED), do: 1
-  def clr(:RED), do: 1
-  def clr(:COLOR_GREEN), do: 2
-  def clr(:GREEN), do: 2
-  def clr(:COLOR_YELLOW), do: 3
-  def clr(:YELLOW), do: 3
-  def clr(:COLOR_BLUE), do: 4
-  def clr(:BLUE), do: 4
-  def clr(:COLOR_MAGENTA), do: 5
-  def clr(:MAGENTA), do: 5
-  def clr(:COLOR_CYAN), do: 6
-  def clr(:CYAN), do: 6
-  def clr(:COLOR_WHITE), do: 7
-  def clr(:WHITE), do: 7
-
   @doc """
-  Initialize ncurses
+  Initialize ncurses. This must be called first.
+
+  TODO: Return stdscr (a window)
   """
+  @spec initscr() :: :ok
   def initscr(), do: Server.invoke(:initscr)
 
   @doc """
   Stop using ncurses and clean the terminal back up.
   """
+  @spec endwin() :: :ok
   def endwin(), do: Server.invoke(:endwin)
 
   @doc """
+  Print the specified string and advance the cursor.
+  Unlike the ncurses printw, this version doesn't support format
+  specification. It is really the same as `addstr/1`.
   """
+  @spec printw(String.t()) :: :ok
   def printw(s), do: Server.invoke(:printw, {s})
+
+  @spec addstr(String.t()) :: :ok
   def addstr(s), do: Server.invoke(:addstr, {s})
+
+  @spec mvprintw(non_neg_integer(), non_neg_integer(), String.t()) :: :ok
   def mvprintw(y, x, s), do: Server.invoke(:mvprintw, {y, x, s})
+
+  @spec mvaddstr(non_neg_integer(), non_neg_integer(), String.t()) :: :ok
   def mvaddstr(y, x, s), do: Server.invoke(:mvaddstr, {y, x, s})
 
+  @doc """
+  Draw a border around the window.
+  """
+  @spec border() :: :ok
   def border(), do: Server.invoke(:border, {})
 
+  @doc """
+  Move the cursor to the new location.
+  """
+  @spec mvcur(non_neg_integer(), non_neg_integer(), non_neg_integer(), non_neg_integer()) :: :ok
   def mvcur(oldrow, oldcol, newrow, newcol),
     do: Server.invoke(:mvcur, {oldrow, oldcol, newrow, newcol})
 
   @doc """
-  Refresh the display.
+  Refresh the display. This needs to be called after any of the print or
+  addstr functions to render their changes.
   """
+  @spec refresh() :: :ok
   def refresh(), do: Server.invoke(:refresh)
+
+  @doc """
+  Clear the screen
+  """
+  @spec clear() :: :ok
   def clear(), do: Server.invoke(:clear)
 
+  @spec raw() :: :ok
   def raw(), do: Server.invoke(:raw)
+
+  @spec cbreak() :: :ok
   def cbreak(), do: Server.invoke(:cbreak)
+
+  @spec nocbreak() :: :ok
   def nocbreak(), do: Server.invoke(:nocbreak)
 
+  @spec noecho() :: :ok
   def noecho(), do: Server.invoke(:noecho)
 
+  @doc """
+  Return the cursor's column.
+  """
+  @spec getx() :: non_neg_integer()
   def getx(), do: Server.invoke(:getx)
+
+  @doc """
+  Return the cursor's row.
+  """
+  @spec gety() :: non_neg_integer()
   def gety(), do: Server.invoke(:gety)
 
+  @spec flushinp() :: :ok
   def flushinp(), do: Server.invoke(:flushinp)
+
+  @spec keypad() :: :ok
   def keypad(), do: Server.invoke(:keypad)
+
+  @spec scrollok() :: :ok
   def scrollok(), do: Server.invoke(:scrollok)
 
+  @doc """
+  Enable the use of colors.
+  """
+  @spec start_color() :: :ok
   def start_color(), do: Server.invoke(:start_color)
+
+
+  @doc """
+  Return whether the display supports color
+  """
+  @spec has_colors() :: boolean()
   def has_colors(), do: Server.invoke(:has_colors)
-  def init_pair(pair, f, b), do: Server.invoke(:init_pair, {pair, f, b})
+
+  @doc """
+  Initialize a foreground/background color pair
+  """
+  @spec init_pair(pair(), color(), color()) :: :ok
+  def init_pair(pair, f, b), do: Server.invoke(:init_pair, {pair, color_to_number(f), color_to_number(b)})
+
+  @spec attron(pair()) :: :ok
   def attron(pair), do: Server.invoke(:attron, {pair})
+
+  @spec attroff(pair()) :: :ok
   def attroff(pair), do: Server.invoke(:attroff, {pair})
+
+  @spec setscrreg(non_neg_integer(), non_neg_integer()) :: :ok
   def setscrreg(top, bottom), do: Server.invoke(:setscrreg, {top, bottom})
 
-  def waddstr(win, str), do: Server.invoke(:waddstr, {win, str})
-
+  @spec newwin(non_neg_integer(), non_neg_integer(), non_neg_integer(), non_neg_integer()) :: window()
   def newwin(nlines, ncols, begin_y, begin_x), do: Server.invoke(:newwin, {nlines, ncols, begin_y, begin_x})
 
+  @spec waddstr(window(), String.t()) :: :ok
+  def waddstr(win, str), do: Server.invoke(:waddstr, {win, str})
+
+  @doc """
+  Return the number of visible columns
+  """
+  @spec cols() :: non_neg_integer()
   def cols(), do: Server.invoke(:cols)
+
+  @doc """
+  Return the number of visible lines
+  """
+  @spec lines() :: non_neg_integer()
   def lines(), do: Server.invoke(:lines)
 
   @doc """
@@ -172,4 +240,15 @@ defmodule ExNcurses do
   Stop listening for events
   """
   defdelegate stop_listening(), to: Server
+
+  defp color_to_number(x) when is_integer(x), do: x
+  defp color_to_number(:black), do: 0
+  defp color_to_number(:red), do: 1
+  defp color_to_number(:green), do: 2
+  defp color_to_number(:yellow), do: 3
+  defp color_to_number(:blue), do: 4
+  defp color_to_number(:magenta), do: 5
+  defp color_to_number(:cyan), do: 6
+  defp color_to_number(:white), do: 7
+
 end
