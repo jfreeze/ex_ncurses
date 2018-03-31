@@ -454,6 +454,17 @@ ex_newwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return rc;
 }
 
+static ERL_NIF_TERM
+ex_delwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    struct ex_window *obj;
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj))
+        return enif_make_badarg(env);
+
+    return done(env, delwin(obj->win));
+}
+
 static int
 get_boolean(ErlNifEnv *env, ERL_NIF_TERM term, bool *v)
 {
@@ -598,6 +609,7 @@ static ErlNifFunc invoke_funcs[] = {
     {"nocbreak",     0, ex_nocbreak,   0},
     {"clear",        0, ex_clear,      0},
     {"cols",         0, ex_cols,       0},
+    {"delwin",       1, ex_delwin,     0},
     {"noecho",       0, ex_noecho,     0},
     {"endwin",       0, ex_endwin,     0},
     {"flushinp",     0, ex_flushinp,   0},

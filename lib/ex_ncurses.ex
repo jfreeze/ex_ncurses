@@ -168,6 +168,9 @@ defmodule ExNcurses do
   def newwin(nlines, ncols, begin_y, begin_x),
     do: Server.invoke(:newwin, {nlines, ncols, begin_y, begin_x})
 
+  @spec delwin(window()) :: :ok
+  def delwin(w), do: Server.invoke(:delwin, {w})
+
   @spec waddstr(window(), String.t()) :: :ok
   def waddstr(win, str), do: Server.invoke(:waddstr, {win, str})
 
