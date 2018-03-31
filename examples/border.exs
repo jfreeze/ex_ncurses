@@ -26,7 +26,7 @@ defmodule Border do
     # 	init_win_params(&win);
     # 	print_win_params(&win);
     #
-    ExNcurses.attron(1);
+    ExNcurses.attron(1)
     ExNcurses.border()
     ExNcurses.mvprintw(10, 10, "Press F1 to exit")
     ExNcurses.refresh()

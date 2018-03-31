@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+struct ex_window {
+    WINDOW *win;
+};
+
 struct ex_ncurses_priv {
     ERL_NIF_TERM atom_ok;
     ERL_NIF_TERM atom_undefined;
@@ -221,7 +225,7 @@ ex_setscrreg(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     unsigned int top, bottom;
     if (!enif_get_uint(env, argv[0], &top) ||
-        !enif_get_uint(env, argv[1], &bottom))
+            !enif_get_uint(env, argv[1], &bottom))
         return enif_make_badarg(env);
 
     int code = setscrreg(top, bottom);
@@ -261,6 +265,18 @@ static ERL_NIF_TERM
 ex_refresh(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int code = refresh();
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
+ex_wrefresh(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    struct ex_window *obj;
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj))
+        return enif_make_badarg(env);
+
+    int code = wrefresh(obj->win);
     return done(env, code);
 }
 
@@ -370,6 +386,26 @@ ex_border(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_wborder(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    struct ex_window *obj;
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj))
+        return enif_make_badarg(env);
+
+    // Use the defaults
+    chtype ls = 0;
+    chtype rs = 0;
+    chtype ts = 0;
+    chtype bs = 0;
+    chtype tl = 0;
+    chtype tr = 0;
+    chtype bl = 0;
+    chtype br = 0;
+    return done(env, wborder(obj->win, ls, rs, ts, bs, tl, tr, bl, br));
+}
+
+static ERL_NIF_TERM
 ex_gety(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int y = getcury(stdscr);
@@ -395,18 +431,14 @@ ex_lines(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return enif_make_int(env, LINES);
 }
 
-struct ex_window {
-    WINDOW *win;
-};
-
 static ERL_NIF_TERM
 ex_newwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int nlines, ncols, begin_y, begin_x;
     if (!enif_get_int(env, argv[0], &nlines) ||
-        !enif_get_int(env, argv[0], &ncols) ||
-        !enif_get_int(env, argv[0], &begin_y) ||
-        !enif_get_int(env, argv[0], &begin_x))
+            !enif_get_int(env, argv[0], &ncols) ||
+            !enif_get_int(env, argv[0], &begin_y) ||
+            !enif_get_int(env, argv[0], &begin_x))
         return enif_make_badarg(env);
 
     WINDOW *win = newwin(nlines, ncols, begin_y, begin_x);
@@ -417,9 +449,9 @@ ex_newwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     struct ex_window *obj = enif_alloc_resource(data->window_rt, sizeof(struct ex_window));
     obj->win = win;
 
-    enif_release_resource(obj); // Let Erlang manage this resource
-
-    return enif_make_resource(env, obj);
+    ERL_NIF_TERM rc = enif_make_resource(env, obj);
+    enif_release_resource(obj); // Let Erlang manage this resource now.
+    return rc;
 }
 
 static int
@@ -446,8 +478,8 @@ ex_scrollok(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc == 2) {
         struct ex_window *obj;
         if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj) ||
-            !get_boolean(env, argv[1], &is_scrollok))
-             return enif_make_badarg(env);
+                !get_boolean(env, argv[1], &is_scrollok))
+            return enif_make_badarg(env);
         win = obj->win;
     }
     return done(env, scrollok(win, is_scrollok));
@@ -460,7 +492,7 @@ ex_waddstr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     struct ex_window *obj;
     ErlNifBinary string;
     if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj) ||
-        !enif_inspect_binary(env, argv[1], &string))
+            !enif_inspect_binary(env, argv[1], &string))
         return enif_make_badarg(env);
 
     // printw is the same as addstr since there's no way of passing
@@ -476,8 +508,8 @@ ex_wmove(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     struct ex_window *obj;
     int y, x;
     if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj) ||
-        !enif_get_int(env, argv[1], &y)||
-        !enif_get_int(env, argv[2], &x))
+            !enif_get_int(env, argv[1], &y)||
+            !enif_get_int(env, argv[2], &x))
         return enif_make_badarg(env);
 
     int code = wmove(obj->win, x, y);
@@ -489,7 +521,7 @@ ex_move(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int y, x;
     if (!enif_get_int(env, argv[0], &y) ||
-        !enif_get_int(env, argv[1], &x))
+            !enif_get_int(env, argv[1], &x))
         return enif_make_badarg(env);
 
     int code = move(x, y);
@@ -589,7 +621,9 @@ static ErlNifFunc invoke_funcs[] = {
     {"setscrreg",    2, ex_setscrreg,  0},
     {"start_color",  0, ex_start_color, 0},
     {"waddstr",      1, ex_waddstr,    0},
-    {"wmove",        3, ex_wmove,      0}
+    {"wborder",      1, ex_wborder,    0},
+    {"wmove",        3, ex_wmove,      0},
+    {"wrefresh",     1, ex_wrefresh,   0}
 };
 
 static ERL_NIF_TERM

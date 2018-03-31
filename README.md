@@ -45,3 +45,11 @@ To run any of the examples, start them by invoking the `run_example.sh` script:
 
     ./run_example.sh demo
 
+## FAQ
+
+### Why isn't anything being drawn to the screen?
+
+Try calling `ExNcurses.refresh/0` or `ExNcurses.wrefresh/1` if you're working in
+a window.
+
+

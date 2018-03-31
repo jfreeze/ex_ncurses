@@ -20,7 +20,8 @@ defmodule ExNcurses do
   @type pair :: non_neg_integer()
   @type color_name :: :black | :red | :green | :yellow | :blue | :magenta | :cyan | :white
   @type color :: 0..7 | color_name()
-  @type window :: term()  # Improve
+  # Improve
+  @type window :: term()
 
   def fun(:F1), do: 265
   def fun(:F2), do: 266
@@ -67,10 +68,16 @@ defmodule ExNcurses do
   def mvaddstr(y, x, s), do: Server.invoke(:mvaddstr, {y, x, s})
 
   @doc """
-  Draw a border around the window.
+  Draw a border around the current window.
   """
   @spec border() :: :ok
   def border(), do: Server.invoke(:border, {})
+
+  @doc """
+  Draw a wborder around a specific window.
+  """
+  @spec wborder(window()) :: :ok
+  def wborder(w), do: Server.invoke(:wborder, {w})
 
   @doc """
   Move the cursor to the new location.
@@ -85,6 +92,9 @@ defmodule ExNcurses do
   """
   @spec refresh() :: :ok
   def refresh(), do: Server.invoke(:refresh)
+
+  @spec wrefresh(window()) :: :ok
+  def wrefresh(w), do: Server.invoke(:wrefresh, {w})
 
   @doc """
   Clear the screen
@@ -131,7 +141,6 @@ defmodule ExNcurses do
   @spec start_color() :: :ok
   def start_color(), do: Server.invoke(:start_color)
 
-
   @doc """
   Return whether the display supports color
   """
@@ -142,7 +151,8 @@ defmodule ExNcurses do
   Initialize a foreground/background color pair
   """
   @spec init_pair(pair(), color(), color()) :: :ok
-  def init_pair(pair, f, b), do: Server.invoke(:init_pair, {pair, color_to_number(f), color_to_number(b)})
+  def init_pair(pair, f, b),
+    do: Server.invoke(:init_pair, {pair, color_to_number(f), color_to_number(b)})
 
   @spec attron(pair()) :: :ok
   def attron(pair), do: Server.invoke(:attron, {pair})
@@ -153,8 +163,10 @@ defmodule ExNcurses do
   @spec setscrreg(non_neg_integer(), non_neg_integer()) :: :ok
   def setscrreg(top, bottom), do: Server.invoke(:setscrreg, {top, bottom})
 
-  @spec newwin(non_neg_integer(), non_neg_integer(), non_neg_integer(), non_neg_integer()) :: window()
-  def newwin(nlines, ncols, begin_y, begin_x), do: Server.invoke(:newwin, {nlines, ncols, begin_y, begin_x})
+  @spec newwin(non_neg_integer(), non_neg_integer(), non_neg_integer(), non_neg_integer()) ::
+          window()
+  def newwin(nlines, ncols, begin_y, begin_x),
+    do: Server.invoke(:newwin, {nlines, ncols, begin_y, begin_x})
 
   @spec waddstr(window(), String.t()) :: :ok
   def waddstr(win, str), do: Server.invoke(:waddstr, {win, str})
@@ -256,5 +268,4 @@ defmodule ExNcurses do
   defp color_to_number(:magenta), do: 5
   defp color_to_number(:cyan), do: 6
   defp color_to_number(:white), do: 7
-
 end

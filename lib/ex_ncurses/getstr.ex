@@ -18,7 +18,8 @@ defmodule ExNcurses.Getstr do
   * `:cancelled` if the user presses ESCape
   * `{:not_done, state}` if more is coming
   """
-  @spec process(%ExNcurses.Getstr{}, non_neg_integer()) :: {:done, String.t()} | :cancelled | {:not_done, %ExNcurses.Getstr{}}
+  @spec process(%ExNcurses.Getstr{}, non_neg_integer()) ::
+          {:done, String.t()} | :cancelled | {:not_done, %ExNcurses.Getstr{}}
   def process(state, ?\n) do
     str =
       state.chars
