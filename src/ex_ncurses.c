@@ -203,6 +203,12 @@ ex_raw(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_beep(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    return done(env, beep());
+}
+
+static ERL_NIF_TERM
 ex_cbreak(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int code = cbreak();
@@ -607,6 +613,7 @@ static ErlNifFunc invoke_funcs[] = {
     {"addstr",       1, ex_printw,     0},
     {"attron",       1, ex_attron,     0},
     {"attroff",      1, ex_attroff,    0},
+    {"beep",         0, ex_beep,       0},
     {"border",       0, ex_border,     0},
     {"cbreak",       0, ex_cbreak,     0},
     {"nocbreak",     0, ex_nocbreak,   0},

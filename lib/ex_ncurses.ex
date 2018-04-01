@@ -109,6 +109,9 @@ defmodule ExNcurses do
   @spec noecho() :: :ok
   def noecho(), do: Server.invoke(:noecho)
 
+  @spec beep() :: :ok
+  def beep(), do: Server.invoke(:beep)
+
   @doc """
   Return the cursor's column.
   """
