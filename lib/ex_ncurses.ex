@@ -97,6 +97,9 @@ defmodule ExNcurses do
   @spec clear() :: :ok
   def clear(), do: Server.invoke(:clear)
 
+  @spec wclear(window()) :: :ok
+  def wclear(w), do: Server.invoke(:wclear, {w})
+
   @spec raw() :: :ok
   def raw(), do: Server.invoke(:raw)
 
@@ -111,6 +114,16 @@ defmodule ExNcurses do
 
   @spec beep() :: :ok
   def beep(), do: Server.invoke(:beep)
+
+  @doc """
+  Set the cursor mode
+
+  * 0 = Invisible
+  * 1 = Terminal-specific normal mode
+  * 2 = Terminal-specific high visibility mode
+  """
+  @spec curs_set(0..2) :: :ok
+  def curs_set(visibility), do: Server.invoke(:curs_set, {visibility})
 
   @doc """
   Return the cursor's column.

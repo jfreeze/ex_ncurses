@@ -415,6 +415,17 @@ ex_wborder(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_wclear(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    struct ex_ncurses_priv *data = enif_priv_data(env);
+    struct ex_window *obj;
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj))
+        return enif_make_badarg(env);
+
+    return done(env, wclear(obj->win));
+}
+
+static ERL_NIF_TERM
 ex_gety(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     int y = getcury(stdscr);
@@ -549,6 +560,16 @@ ex_move(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_curs_set(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    int visibility;
+    if (!enif_get_int(env, argv[0], &visibility))
+        return enif_make_badarg(env);
+
+    return done(env, curs_set(visibility));
+}
+
+static ERL_NIF_TERM
 ex_poll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
@@ -619,6 +640,7 @@ static ErlNifFunc invoke_funcs[] = {
     {"nocbreak",     0, ex_nocbreak,   0},
     {"clear",        0, ex_clear,      0},
     {"cols",         0, ex_cols,       0},
+    {"curs_set",     1, ex_curs_set,   0},
     {"delwin",       1, ex_delwin,     0},
     {"noecho",       0, ex_noecho,     0},
     {"endwin",       0, ex_endwin,     0},
@@ -643,6 +665,7 @@ static ErlNifFunc invoke_funcs[] = {
     {"start_color",  0, ex_start_color, 0},
     {"waddstr",      1, ex_waddstr,    0},
     {"wborder",      1, ex_wborder,    0},
+    {"wclear",       1, ex_wclear,     0},
     {"wmove",        3, ex_wmove,      0},
     {"wrefresh",     1, ex_wrefresh,   0}
 };
