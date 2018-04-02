@@ -140,9 +140,15 @@ defmodule ExNcurses do
   @spec flushinp() :: :ok
   def flushinp(), do: Server.invoke(:flushinp)
 
+  @doc """
+  Enable the terminal's keypad to capture function keys as single characters.
+  """
   @spec keypad() :: :ok
   def keypad(), do: Server.invoke(:keypad)
 
+  @doc """
+  Enable scrolling on `stdscr`.
+  """
   @spec scrollok() :: :ok
   def scrollok(), do: Server.invoke(:scrollok)
 
@@ -165,29 +171,56 @@ defmodule ExNcurses do
   def init_pair(pair, f, b),
     do: Server.invoke(:init_pair, {pair, color_to_number(f), color_to_number(b)})
 
+  @doc """
+  Turn on the bit-masked attribute values pass in on the current screen.
+  """
   @spec attron(pair()) :: :ok
   def attron(pair), do: Server.invoke(:attron, {pair})
 
+  @doc """
+  Turn off the bit-masked attribute values pass in on the current screen.
+  """
   @spec attroff(pair()) :: :ok
   def attroff(pair), do: Server.invoke(:attroff, {pair})
 
+  @doc """
+  Set a scrollable region on the `stdscr`
+  """
   @spec setscrreg(non_neg_integer(), non_neg_integer()) :: :ok
   def setscrreg(top, bottom), do: Server.invoke(:setscrreg, {top, bottom})
 
+  @doc """
+  Create a new window with number of nlines, number columns, starting y position, and
+  starting x position.
+  """
   @spec newwin(non_neg_integer(), non_neg_integer(), non_neg_integer(), non_neg_integer()) ::
           window()
   def newwin(nlines, ncols, begin_y, begin_x),
     do: Server.invoke(:newwin, {nlines, ncols, begin_y, begin_x})
 
+  @doc """
+  Delete a window `w`. This cleans up all memory resources associated with it. The application
+  must delete subwindows before deleteing the main window.
+  """
   @spec delwin(window()) :: :ok
   def delwin(w), do: Server.invoke(:delwin, {w})
 
+  @doc """
+  Add a string to a window `win`. This function will advance the cursor position,
+  perform special character processing, and perform wrapping.
+  """
   @spec waddstr(window(), String.t()) :: :ok
   def waddstr(win, str), do: Server.invoke(:waddstr, {win, str})
 
+  @doc """
+  Move the cursor associated with the specified window to (y, x) relative to the window's orgin.
+  """
   @spec wmove(window(), non_neg_integer(), non_neg_integer()) :: :ok
   def wmove(win, y, x), do: Server.invoke(:wmove, {win, y, x})
 
+  @doc """
+  Move the cursor for the current window to (y, x) relative to the window's orgin.
+  """
   @spec move(non_neg_integer(), non_neg_integer()) :: :ok
   def move(y, x), do: Server.invoke(:move, {y, x})
 

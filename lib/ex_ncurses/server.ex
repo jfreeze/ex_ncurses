@@ -16,18 +16,31 @@ defmodule ExNcurses.Server do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
+  @doc """
+  Initializes the the ncurses library, performs first refersh to clear
+  the screen.
+  """
   def initscr() do
     GenServer.call(__MODULE__, :initscr)
   end
 
+  @doc """
+  Invoke a ncurses C function
+  """
   def invoke(name, args \\ {}) do
     GenServer.call(__MODULE__, {:invoke, name, args})
   end
 
+  @doc """
+  Listen for events from ncurses
+  """
   def listen() do
     GenServer.call(__MODULE__, :listen)
   end
 
+  @doc """
+  Stop listening for events from ncurses
+  """
   def stop_listening() do
     GenServer.call(__MODULE__, :stop_listening)
   end
