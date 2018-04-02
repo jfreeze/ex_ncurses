@@ -20,6 +20,8 @@ struct ex_ncurses_priv {
     int stdin_fd;
     FILE *stdin_fp;
 
+    int pipe_to_nowhere[2];
+
     bool ncurses_initialized;
     bool polling;
 };
@@ -131,17 +133,16 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         // To avoid interfering with Erlang's tty_sl driver, we
         // duplicate the stdin filehandle and use that one instead.
         // Since we don't want Erlang to handle input anymore, we
-        // replace STDIN_FILENO with /dev/null.
+        // replace STDIN_FILENO with a pipe to nowhere.
         data->stdin_fd = dup(STDIN_FILENO);
         if (data->stdin_fd <= 0) {
             enif_fprintf(stderr, "Error dup'ing stdin\n");
             return make_error(env, "dup");
         }
-        int nulfd = open("/dev/null", O_RDONLY);
-        if (nulfd <= 0) {
-            enif_fprintf(stderr, "Error opening /dev/null or got fd 0 somehow\n");
+        if (pipe(data->pipe_to_nowhere) < 0) {
+            enif_fprintf(stderr, "Error creating pipe to nowhere\n");
             close(data->stdin_fd);
-            return make_error(env, "open");
+            return make_error(env, "pipe");
         }
         // NOTE: dup2 automatically closes STDIN_FILENO before replacing it
         //       so no need to call close. Unfortunately, if STDIN_FILENO is
@@ -150,12 +151,11 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         //       to the console. It would be nice if initscr could be
         //       guaranteed to be called from the thread servicing the
         //       console, but I don't know how to do that. :(
-        int rc = dup2(nulfd, STDIN_FILENO);
+        int rc = dup2(data->pipe_to_nowhere[0], STDIN_FILENO);
         if (rc != STDIN_FILENO) {
             enif_fprintf(stderr, "Error replacing stdin\n");
             return make_error(env, "dup2");
         }
-        close(nulfd);
 
         data->stdin_fp = fdopen(data->stdin_fd, "r");
 
@@ -182,6 +182,9 @@ ex_endwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     fclose(data->stdin_fp); // This also closes data->stdin_fd
     data->stdin_fd = -1;
     data->stdin_fp = NULL;
+
+    close(data->pipe_to_nowhere[0]);
+    close(data->pipe_to_nowhere[1]);
 
     data->ncurses_initialized = false;
 
