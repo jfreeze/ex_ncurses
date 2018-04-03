@@ -10,6 +10,7 @@ defmodule ExNcurses.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       compilers: [:elixir_make | Mix.compilers()],
+      make_targets: ["all"],
       make_clean: ["clean"],
       make_env: make_env(),
       aliases: [format: ["format", &format_c/1]]

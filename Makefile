@@ -11,9 +11,6 @@
 # Look for the EI library and header files
 # For crosscompiled builds, ERL_EI_INCLUDE_DIR and ERL_EI_LIBDIR must be
 # passed into the Makefile.
-ifeq ($(ERL_EI_INCLUDE_DIR),)
-    $(error ERL_EI_INCLUDE_DIR not set. Invoke via mix)
-endif
 
 # Set Erlang-specific compile and linker flags
 ERL_CFLAGS ?= -I$(ERL_EI_INCLUDE_DIR)
@@ -29,6 +26,9 @@ endif
 endif
 
 NIF=priv/ex_ncurses.so
+
+calling_from_make:
+	mix compile
 
 all: priv $(NIF)
 
