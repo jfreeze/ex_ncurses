@@ -50,7 +50,25 @@ defmodule ExNcurses.Server do
   end
 
   def handle_call(:initscr, _from, state) do
-    {:reply, Nif.initscr(), state}
+    # The NIF swaps out stdin in the call to initscr so that the IEx console or
+    # any Erlang console code doesn't processes keys that should go to ncurses.
+    # In order for this to work reliably, the stdin filehandle cannot be in
+    # use.  Specifically, it can't be submitted to a syscall since the swapping
+    # procedure causes an error on any in progress syscalls.  To fix this, tell
+    # the Erlang scheduler to only allow one OS thread during the swap. This
+    # would normally be an unforgivable offense to the Erlang VM, but
+    # presumably ncurses isn't being initialized frequently.
+    :erlang.system_flag(:multi_scheduling, :block)
+    rc = Nif.initscr()
+    :erlang.system_flag(:multi_scheduling, :unblock)
+    {:reply, rc, state}
+  end
+
+  def handle_call({:invoke, :endwin, args}, _from, state) do
+    :erlang.system_flag(:multi_scheduling, :block)
+    rc = Nif.invoke(:endwin, args)
+    :erlang.system_flag(:multi_scheduling, :unblock)
+    {:reply, rc, state}
   end
 
   def handle_call({:invoke, name, args}, _from, state) do
