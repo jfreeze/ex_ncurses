@@ -1,36 +1,65 @@
-defmodule ExNcurses.Mixfile do
+defmodule ExNcurses.MixProject do
   use Mix.Project
 
   def project do
     [
       app: :ex_ncurses,
       version: "0.0.2",
-      elixir: "~> 1.1",
-      build_embedded: Mix.env() == :prod,
+      package: package(),
+      elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      compilers: [:elixir_make] ++ Mix.compilers(),
+      deps: deps(),
+      compilers: [:elixir_make | Mix.compilers()],
+      make_targets: ["all"],
       make_clean: ["clean"],
-      deps: deps()
+      make_env: make_env(),
+      aliases: [format: ["format", &format_c/1]]
     ]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type "mix help compile.app" for more information
-  def application do
-    [applications: []]
+  defp make_env() do
+    case System.get_env("ERL_EI_INCLUDE_DIR") do
+      nil ->
+        %{
+          "ERL_EI_INCLUDE_DIR" => "#{:code.root_dir()}/usr/include",
+          "ERL_EI_LIBDIR" => "#{:code.root_dir()}/usr/lib"
+        }
+
+      _ ->
+        %{}
+    end
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type "mix help deps" for more examples and options
-  defp deps do
-    [{:elixir_make, "~> 0.4", runtime: false}]
+  # Run "mix help compile.app" to learn about applications.
+  def application do
+    [
+      extra_applications: [:logger],
+      mod: {ExNcurses.Application, []}
+    ]
   end
+
+  # Run "mix help deps" to learn about dependencies.
+  defp deps do
+    [{:elixir_make, "~> 0.4", runtime: false}, {:ex_doc, "~> 0.11", only: :dev, runtime: false}]
+  end
+
+  defp package() do
+    [
+      maintainers: [""],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/jfreeze/ex_ncurses"}
+    ]
+  end
+
+  defp format_c([]) do
+    astyle =
+      System.find_executable("astyle") ||
+        Mix.raise("""
+        Could not format C code since astyle is not available.
+        """)
+
+    System.cmd(astyle, ["-n", "-r", "src/*.c"], into: IO.stream(:stdio, :line))
+  end
+
+  defp format_c(_args), do: true
 end
