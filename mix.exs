@@ -52,6 +52,7 @@ defmodule ExNcurses.MixProject do
 
   defp package() do
     [
+      name: :ex_ncurses,
       maintainers: ["Jim Freeze, Frank Hunleth, Justin Schneck"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/jfreeze/ex_ncurses"}
