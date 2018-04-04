@@ -17,6 +17,8 @@ struct ex_ncurses_priv {
 
     void *resource;
 
+    bool using_real_stdin;
+
     int stdin_fd;
     FILE *stdin_fp;
 
@@ -87,6 +89,8 @@ static int load(ErlNifEnv *env, void **priv, ERL_NIF_TERM info)
     data->resource = enif_alloc_resource(data->rt, sizeof(int));
 
     data->ncurses_initialized = false;
+    data->using_real_stdin = false;
+
     data->polling = false;
 
     data->stdin_fd = -1;
@@ -129,7 +133,16 @@ static ERL_NIF_TERM
 ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
-    if (!data->ncurses_initialized) {
+    if (data->ncurses_initialized)
+        return data->atom_ok;
+
+    ErlNifBinary string;
+    if (!enif_inspect_binary(env, argv[0], &string))
+        return enif_make_badarg(env);
+
+    if (string.size == 0 || (string.size == 8 && memcmp(string.data, "/dev/tty", 8) == 0)) {
+        // The user wants to take over Erlang's terminal
+
         // To avoid interfering with Erlang's tty_sl driver, we
         // duplicate the stdin filehandle and use that one instead.
         // Since we don't want Erlang to handle input anymore, we
@@ -163,8 +176,23 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         // our new "stdin"
         newterm(getenv("TERM"), stdout, data->stdin_fp);
 
-        data->ncurses_initialized = true;
+        data->using_real_stdin = true;
+    } else {
+        // Use the user-supplied terminal instead
+        char termname[string.size + 1];
+        memcpy(termname, string.data, string.size);
+        termname[string.size] = 0;
+
+        data->stdin_fp = fopen(termname, "r+e");
+        if (data->stdin_fp == NULL)
+            return make_error(env, "enoent");
+        data->stdin_fd = fileno(data->stdin_fp);
+
+        newterm(getenv("TERM"), data->stdin_fp, data->stdin_fp);
+
+        data->using_real_stdin = false;
     }
+    data->ncurses_initialized = true;
 
     return data->atom_ok;
 }
@@ -175,16 +203,18 @@ ex_endwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     struct ex_ncurses_priv *data = enif_priv_data(env);
     int code = endwin();
 
-    // Undo our manipulation of filehandles from initscr
-    // by dup'ing the real stdin back to STDIN_FILENO.
-    dup2(data->stdin_fd, STDIN_FILENO);
+    if (data->using_real_stdin) {
+        // Undo our manipulation of filehandles from initscr
+        // by dup'ing the real stdin back to STDIN_FILENO.
+        dup2(data->stdin_fd, STDIN_FILENO);
+
+        close(data->pipe_to_nowhere[0]);
+        close(data->pipe_to_nowhere[1]);
+    }
 
     fclose(data->stdin_fp); // This also closes data->stdin_fd
     data->stdin_fd = -1;
     data->stdin_fp = NULL;
-
-    close(data->pipe_to_nowhere[0]);
-    close(data->pipe_to_nowhere[1]);
 
     data->ncurses_initialized = false;
 
@@ -701,11 +731,11 @@ ex_invoke(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ErlNifFunc nif_funcs[] = {
-    {"initscr",   0, ex_initscr,    0},
+    {"initscr",   1, ex_initscr, 0},
     {"invoke",    2, ex_invoke,  0},
     {"poll",      0, ex_poll,    0},
-    {"read",      0, ex_read,  0},
-    {"stop",      0, ex_stop,  0},
+    {"read",      0, ex_read,    0},
+    {"stop",      0, ex_stop,    0},
 };
 
 ERL_NIF_INIT(Elixir.ExNcurses.Nif, nif_funcs,

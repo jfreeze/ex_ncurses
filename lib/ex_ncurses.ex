@@ -32,12 +32,19 @@ defmodule ExNcurses do
   def fun(:F12), do: 276
 
   @doc """
-  Initialize ncurses. This must be called first.
+  Initialize ncurses on a terminal. This should be called before any of the
+  other functions.
+
+  By default, ncurses uses the current terminal. If you're debugging or want to
+  have IEx available while in ncurses-mode you can also have it use a different
+  window. One way of doing this is to open up another terminal session. At the
+  prompt, run `tty`. Then pass the path that it returns to this function.
+  Currently input doesn't work in this mode.
 
   TODO: Return stdscr (a window)
   """
-  @spec initscr() :: :ok
-  defdelegate initscr(), to: Server
+  @spec initscr(String.t()) :: :ok
+  defdelegate initscr(termname \\ ""), to: Server
 
   @doc """
   Stop using ncurses and clean the terminal back up.

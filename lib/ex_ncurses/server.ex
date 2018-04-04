@@ -17,11 +17,13 @@ defmodule ExNcurses.Server do
   end
 
   @doc """
-  Initializes the the ncurses library, performs first refersh to clear
-  the screen.
+  Initialize the the ncurses library on the specified terminal.
+
+  If "", the current terminal (the one with the IEx prompt)
+  is used. You can also specify another terminal.
   """
-  def initscr() do
-    GenServer.call(__MODULE__, :initscr)
+  def initscr(termname) do
+    GenServer.call(__MODULE__, {:initscr, termname})
   end
 
   @doc """
@@ -49,7 +51,9 @@ defmodule ExNcurses.Server do
     {:ok, %State{}}
   end
 
-  def handle_call(:initscr, _from, state) do
+  def handle_call({:initscr, termname}, _from, state) do
+    # Handling the case where termname specifies the terminal with the console:
+    #
     # The NIF swaps out stdin in the call to initscr so that the IEx console or
     # any Erlang console code doesn't processes keys that should go to ncurses.
     # In order for this to work reliably, the stdin filehandle cannot be in
@@ -59,7 +63,7 @@ defmodule ExNcurses.Server do
     # would normally be an unforgivable offense to the Erlang VM, but
     # presumably ncurses isn't being initialized frequently.
     :erlang.system_flag(:multi_scheduling, :block)
-    rc = Nif.initscr()
+    rc = Nif.initscr(termname)
     :erlang.system_flag(:multi_scheduling, :unblock)
     {:reply, rc, state}
   end

@@ -10,9 +10,9 @@ defmodule ExNcurses.Nif do
   end
 
   @doc """
-  Initialize ncurses.
+  Initialize ncurses on the specified terminal.
   """
-  def initscr(), do: :erlang.nif_error(:nif_not_loaded)
+  def initscr(_termname), do: :erlang.nif_error(:nif_not_loaded)
 
   @doc """
   Poll for events from ncurses. When an event is ready,
