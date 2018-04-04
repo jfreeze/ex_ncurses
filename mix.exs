@@ -4,10 +4,11 @@ defmodule ExNcurses.MixProject do
   def project do
     [
       app: :ex_ncurses,
-      version: "0.0.2",
+      version: "0.1.0",
       package: package(),
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
+      description: description(),
       deps: deps(),
       compilers: [:elixir_make | Mix.compilers()],
       make_targets: ["all"],
@@ -38,6 +39,12 @@ defmodule ExNcurses.MixProject do
     ]
   end
 
+  defp description() do
+    """
+    ExNcurses - a NIF interface to the ncurses lib.
+    """
+  end
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [{:elixir_make, "~> 0.4", runtime: false}, {:ex_doc, "~> 0.11", only: :dev, runtime: false}]
@@ -45,7 +52,7 @@ defmodule ExNcurses.MixProject do
 
   defp package() do
     [
-      maintainers: [""],
+      maintainers: ["Jim Freeze, Frank Hunleth, Justin Schneck"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/jfreeze/ex_ncurses"}
     ]
