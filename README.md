@@ -1,25 +1,27 @@
 # ex_ncurses
-Ncurses Nif for Elixir (or Erlang)
+
+Ncurses NIF for Elixir
 
 ## What It Does
 
-ExNcurses is a Nif that you can add to your project and monitor
-keyboard inputs one character at a time.
-
-Testing ncurses inside an 'iex -S mix' console will fail to work after a few keystrokes.
+ExNcurses is a NIF that let's you create text-based user interfaces and games.
+It connects Elixir to the [ncurses
+library](https://www.gnu.org/software/ncurses/ncurses.html). Not all of ncurses
+is available, but quite a bit is including the ability to receive key presses as
+they happen.
 
 ## Usage
 
-For usage, you can look at the code in the `examples` directory
-or check out the QuickieSynth sample project (@elixirsips)
-where we show a version using ExNcurses.
+For usage, you can look at the code in the `examples` directory or check out the
+QuickieSynth sample project (@elixirsips) where we show a version using
+ExNcurses.
 
    [github.com/jfreeze/ex_ncurses](https://github.com/jfreeze/ex_ncurses)
 
 ## Installation
 
-The package is available on [github](https://github.com/jfreeze/ex_ncurses) can be installed
-by adding `ex_ncurses` to your list of dependencies in `mix.exs`:
+The package is available on [github](https://github.com/jfreeze/ex_ncurses) can
+be installed by adding `ex_ncurses` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -36,8 +38,10 @@ however is appropriate for your system.
 
 Then the project can be compiled with
 
-    mix deps.get
-    mix compile
+```sh
+mix deps.get
+mix compile
+```
 
 ### Run the examples
 
@@ -47,7 +51,7 @@ To run any of the examples, start them by invoking the `run_example.sh` script:
 
 ## FAQ
 
-### Why isn't anything being drawn to the screen?
+### Why isn't anything being drawn to the screen
 
 Try calling `ExNcurses.refresh/0` or `ExNcurses.wrefresh/1` if you're working in
 a window.
@@ -57,3 +61,10 @@ a window.
 That's the ncurses way. Everything is row and then column, so y comes first. The
 upper left is (0, 0).
 
+### What happened to the Elixir console
+
+It's still there. It won't receive any input between calls to
+`ExNcurses.initscr/0` and `ExNcurses.endwin/0`. I'm still on the fence with what
+to do with the console. It could be redirected, output could be thrown away,
+etc. At the moment, you'll likely want to turn on the Elixir console logger so
+that it doesn't interfere with the display.
