@@ -1,5 +1,7 @@
 # ex_ncurses
 
+[![Hex version](https://img.shields.io/hexpm/v/ex_ncurses.svg "Hex version")](https://hex.pm/packages/ex_ncurses)
+
 Ncurses NIF for Elixir
 
 ## What It Does
@@ -20,13 +22,13 @@ ExNcurses.
 
 ## Installation
 
-The package is available on [github](https://github.com/jfreeze/ex_ncurses) can
+The package is available on [hex.pm](https://hex.pm/packages/ex_ncurses) and can
 be installed by adding `ex_ncurses` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:ex_ncurses, git: "https://github.com/jfreeze/ex_ncurses.git"}
+    {:ex_ncurses, "~> 0.1"}
   ]
 end
 ```
