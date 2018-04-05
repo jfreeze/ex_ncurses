@@ -18,8 +18,6 @@ For usage, you can look at the code in the `examples` directory or check out the
 QuickieSynth sample project (@elixirsips) where we show a version using
 ExNcurses.
 
-   [github.com/jfreeze/ex_ncurses](https://github.com/jfreeze/ex_ncurses)
-
 ## Installation
 
 The package is available on [hex.pm](https://hex.pm/packages/ex_ncurses) and can
