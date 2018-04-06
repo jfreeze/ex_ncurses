@@ -76,6 +76,7 @@ defmodule Demo do
     row = ExNcurses.lines()
     col = ExNcurses.cols()
     ExNcurses.mvprintw(div(row, 2), div(col - String.length(mesg), 2), mesg)
+    ExNcurses.refresh()
     # print the message at the center of the screen
 
     str = ExNcurses.getstr()
