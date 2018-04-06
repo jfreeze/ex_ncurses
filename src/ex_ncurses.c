@@ -712,7 +712,8 @@ ex_invoke(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!data->ncurses_initialized)
         return make_error(env, "uninitialized");
 
-    for (size_t i = 0; i < sizeof(invoke_funcs) / sizeof(ErlNifFunc); i++) {
+    size_t i;
+    for (i = 0; i < sizeof(invoke_funcs) / sizeof(ErlNifFunc); i++) {
         if (strcmp(invoke_funcs[i].name, name) == 0 &&
                 invoke_funcs[i].arity <= (unsigned) arity) {
             return invoke_funcs[i].fptr(env, arity, array);
