@@ -1,5 +1,6 @@
 # ex_ncurses
 
+[![Build Status](https://travis-ci.org/jfreeze/ex_ncurses.svg?branch=master)](https://travis-ci.org/jfreeze/ex_ncurses)
 [![Hex version](https://img.shields.io/hexpm/v/ex_ncurses.svg "Hex version")](https://hex.pm/packages/ex_ncurses)
 
 Ncurses NIF for Elixir
