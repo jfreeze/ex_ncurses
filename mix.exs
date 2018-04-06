@@ -4,7 +4,7 @@ defmodule ExNcurses.MixProject do
   def project do
     [
       app: :ex_ncurses,
-      version: "0.2.0",
+      version: "0.3.1",
       package: package(),
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
