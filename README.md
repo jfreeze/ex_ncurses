@@ -26,7 +26,7 @@ be installed by adding `ex_ncurses` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_ncurses, "~> 0.1"}
+    {:ex_ncurses, "~> 0.3"}
   ]
 end
 ```
