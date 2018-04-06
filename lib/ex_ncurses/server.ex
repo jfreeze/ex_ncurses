@@ -27,6 +27,13 @@ defmodule ExNcurses.Server do
   end
 
   @doc """
+  Stop using ncurses.
+  """
+  def endwin() do
+    GenServer.call(__MODULE__, :endwin)
+  end
+
+  @doc """
   Invoke a ncurses C function
   """
   def invoke(name, args \\ {}) do
@@ -65,12 +72,16 @@ defmodule ExNcurses.Server do
     :erlang.system_flag(:multi_scheduling, :block)
     rc = Nif.initscr(termname)
     :erlang.system_flag(:multi_scheduling, :unblock)
+
+    # Assuming initialization was ok, start polling stdin for key presses
+    if rc == :ok, do: Nif.poll()
+
     {:reply, rc, state}
   end
 
-  def handle_call({:invoke, :endwin, args}, _from, state) do
+  def handle_call(:endwin, _from, state) do
     :erlang.system_flag(:multi_scheduling, :block)
-    rc = Nif.invoke(:endwin, args)
+    rc = Nif.endwin()
     :erlang.system_flag(:multi_scheduling, :unblock)
     {:reply, rc, state}
   end
@@ -80,11 +91,11 @@ defmodule ExNcurses.Server do
   end
 
   def handle_call(:listen, {pid, _ref}, state) do
-    {:reply, Nif.poll(), %{state | pid: pid}}
+    {:reply, :ok, %{state | pid: pid}}
   end
 
   def handle_call(:stop_listening, _from, state) do
-    {:reply, Nif.stop(), %{state | pid: nil}}
+    {:reply, :ok, %{state | pid: nil}}
   end
 
   def handle_info({:select, _res, _ref, :ready_input}, state) do

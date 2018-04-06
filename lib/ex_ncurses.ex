@@ -50,7 +50,7 @@ defmodule ExNcurses do
   Stop using ncurses and clean the terminal back up.
   """
   @spec endwin() :: :ok
-  def endwin(), do: Server.invoke(:endwin)
+  defdelegate endwin(), to: Server
 
   @doc """
   Print the specified string and advance the cursor.

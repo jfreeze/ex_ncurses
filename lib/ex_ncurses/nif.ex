@@ -27,9 +27,9 @@ defmodule ExNcurses.Nif do
   def read(), do: :erlang.nif_error(:nif_not_loaded)
 
   @doc """
-  Stop polling for events.
+  Stop using ncurses.
   """
-  def stop(), do: :erlang.nif_error(:nif_not_loaded)
+  def endwin(), do: :erlang.nif_error(:nif_not_loaded)
 
   @doc """
   Invoke an ncurses function
