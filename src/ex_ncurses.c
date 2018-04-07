@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+ERL_NIF_TERM key_to_elixir(ErlNifEnv *env, int code);
+
 struct ex_window {
     WINDOW *win;
 };
@@ -653,7 +655,7 @@ ex_read(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         }
     }
 
-    return enif_make_int(env, code);
+    return key_to_elixir(env, code);
 }
 
 static ErlNifFunc invoke_funcs[] = {

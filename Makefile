@@ -38,7 +38,7 @@ priv:
 %.o: %.c
 	$(CC) -c $(ERL_CFLAGS) $(CFLAGS) -o $@ $<
 
-$(NIF): src/ex_ncurses.o
+$(NIF): src/ex_ncurses.o src/key_mappings.o
 	$(CC) $^ $(ERL_LDFLAGS) $(LDFLAGS) -o $@
 
 clean:

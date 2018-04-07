@@ -17,6 +17,29 @@ defmodule ExNcurses do
   @type color_name :: :black | :red | :green | :yellow | :blue | :magenta | :cyan | :white
   @type color :: 0..7 | color_name()
   @type window :: reference()
+  @type key ::
+          0..255
+          | :down
+          | :up
+          | :left
+          | :right
+          | :home
+          | :backspace
+          | :f0
+          | :f1
+          | :f2
+          | :f3
+          | :f4
+          | :f5
+          | :f6
+          | :f7
+          | :f8
+          | :f9
+          | :f10
+          | :f11
+          | :f12
+          | :f13
+          | :f14
 
   @spec addstr(String.t()) :: :ok
   def addstr(s), do: Server.invoke(:addstr, {s})
@@ -93,24 +116,12 @@ defmodule ExNcurses do
   @spec flushinp() :: :ok
   def flushinp(), do: Server.invoke(:flushinp)
 
-  def fun(:F1), do: 265
-  def fun(:F2), do: 266
-  def fun(:F3), do: 267
-  def fun(:F4), do: 268
-  def fun(:F5), do: 269
-  def fun(:F6), do: 270
-  def fun(:F7), do: 271
-  def fun(:F8), do: 272
-  def fun(:F9), do: 273
-  def fun(:F10), do: 274
-  def fun(:F11), do: 275
-  def fun(:F12), do: 276
-
   @doc """
   Poll for a key press.
 
   See `listen/0` for a better way of getting keyboard input.
   """
+  @spec getch() :: key()
   def getch() do
     listen()
 
@@ -182,7 +193,7 @@ defmodule ExNcurses do
   """
   @spec initscr(String.t()) :: :ok
   defdelegate initscr(termname \\ ""), to: Server
-  
+
   @doc """
   Initialize a foreground/background color pair
   """

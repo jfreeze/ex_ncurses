@@ -49,10 +49,10 @@ defmodule Demo do
     # clear input
     ExNcurses.flushinp()
     char = ExNcurses.getch()
-    center_text(y + 1, "You entered '#{char}'  ")
+    center_text(y + 1, "You entered '#{inspect(char)}'  ")
     ExNcurses.refresh()
     # F1 exits
-    if char != ExNcurses.fun(:F1), do: sample_2a()
+    if char != :f1, do: sample_2a()
   end
 
   def sample_3 do

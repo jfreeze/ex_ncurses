@@ -31,11 +31,11 @@ defmodule ExNcurses.Getstr do
 
   def process(_state, 27), do: :cancelled
 
-  def process(%{chars: []} = state, key) when key == 127 or key == 263 do
+  def process(%{chars: []} = state, key) when key == 127 or key == :backspace do
     {:not_done, state}
   end
 
-  def process(%{chars: [_c | rest]} = state, key) when key == 127 or key == 263 do
+  def process(%{chars: [_c | rest]} = state, key) when key == 127 or key == :backspace do
     new_cursor = state.cursor - 1
     ExNcurses.mvprintw(state.y, state.x + new_cursor, " \b")
     ExNcurses.refresh()
