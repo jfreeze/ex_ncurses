@@ -17,7 +17,6 @@ defmodule Demo do
   end
 
   def sample_1 do
-    IO.puts("Running ExNcurses Sample 1")
     cols = ExNcurses.cols()
     lines = ExNcurses.lines()
     ExNcurses.cbreak()
@@ -30,34 +29,19 @@ defmodule Demo do
     ExNcurses.printw("\n")
     ExNcurses.printw("cols: #{cols}\n")
     ExNcurses.refresh()
-    Process.sleep(2000)
+    ExNcurses.getch()
   end
 
   def sample_2 do
-    welcome = "Running ExNcurses Sample 2"
-
-    ExNcurses.mvprintw(
-      div(ExNcurses.lines(), 2),
-      div(ExNcurses.cols() - String.length(welcome), 2),
-      welcome
-    )
-
-    msg = "F1 to exit"
-
-    ExNcurses.mvprintw(
-      div(ExNcurses.lines(), 2) + 1,
-      div(ExNcurses.cols() - String.length(msg), 2),
-      msg
-    )
+    center_text(div(ExNcurses.lines(), 2), "Running ExNcurses Sample 2")
+    center_text(div(ExNcurses.lines(), 2) + 1, "F1 to exit")
 
     sample_2a()
   end
 
   def sample_2a do
-    msg = "Enter a character please: "
     y = div(ExNcurses.lines(), 4)
-    x = div(ExNcurses.cols() - String.length(msg), 2)
-    ExNcurses.mvprintw(y, x, msg)
+    center_text(y, "Enter a character please: ")
     ExNcurses.refresh()
 
     # accept Function keys
@@ -65,17 +49,15 @@ defmodule Demo do
     # clear input
     ExNcurses.flushinp()
     char = ExNcurses.getch()
-    ExNcurses.mvprintw(y + 1, x, "You entered '#{char}'\n")
+    center_text(y + 1, "You entered '#{char}'  ")
     ExNcurses.refresh()
     # F1 exits
     if char != ExNcurses.fun(:F1), do: sample_2a()
   end
 
   def sample_3 do
-    mesg = "Enter a string: "
     row = ExNcurses.lines()
-    col = ExNcurses.cols()
-    ExNcurses.mvprintw(div(row, 2), div(col - String.length(mesg), 2), mesg)
+    center_text(div(row, 2), "Enter a string: ")
     ExNcurses.refresh()
     # print the message at the center of the screen
 
@@ -83,6 +65,14 @@ defmodule Demo do
     ExNcurses.mvprintw(row - 2, 0, "You Entered: #{inspect(str)}")
     ExNcurses.refresh()
     ExNcurses.getch()
+  end
+
+  defp center_text(row, msg) do
+    ExNcurses.mvprintw(
+      row,
+      div(ExNcurses.cols() - String.length(msg), 2),
+      msg
+    )
   end
 end
 
