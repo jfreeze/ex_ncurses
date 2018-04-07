@@ -5,19 +5,26 @@
 
 Ncurses NIF for Elixir
 
-## What It Does
+## What it does
 
 ExNcurses is a NIF that let's you create text-based user interfaces and games.
 It connects Elixir to the [ncurses
-library](https://www.gnu.org/software/ncurses/ncurses.html). Not all of ncurses
-is available, but quite a bit is including the ability to receive key presses as
-they happen.
+library](https://www.gnu.org/software/ncurses/ncurses.html).
 
-## Usage
+## Differences from C ncurses
 
-For usage, you can look at the code in the `examples` directory or check out the
-QuickieSynth sample project (@elixirsips) where we show a version using
-ExNcurses.
+In general, this library provides a thin wrapper on most ncurses functions.
+That means that the documentation and examples for the C library should apply
+fairly directly. There are some differences:
+
+* #defines are now atoms. For exaample, instead of `KEY_UP` for up arrow, you'll
+  receive the atom `:up`.
+* Keyboard input comes in as `{ex_ncurses, :key, code}` messages if you call
+  `listen/0`. You can still call `getch()` like in C, but it doesn't have the
+  semantics.
+* Functions that take `printf` style arguments in C are available, but don't
+  support arguments. It's expected that programs construct strings in Elixir
+  like normal..
 
 ## Installation
 
@@ -44,11 +51,17 @@ mix deps.get
 mix compile
 ```
 
-### Run the examples
+## Examples
 
-To run any of the examples, start them by invoking the `run_example.sh` script:
+To run any of the example scripts, start them by invoking the `run_example.sh`:
 
-    ./run_example.sh demo
+```sh
+./run_example.sh demo
+```
+
+More examples can be found at:
+
+* [Snake](https://github.com/fhunleth/snake)
 
 ## FAQ
 
