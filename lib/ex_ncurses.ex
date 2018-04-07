@@ -341,6 +341,32 @@ defmodule ExNcurses do
   def refresh(), do: Server.invoke(:refresh)
 
   @doc """
+  Dump the contents of the virtual screen to a file.
+  """
+  @spec scr_dump(String.t()) :: :ok
+  def scr_dump(filename), do: Server.invoke(:scr_dump, {filename})
+
+  @doc """
+  Call this after initscr to initialize the ncurses data structures.
+  """
+  @spec scr_init(String.t()) :: :ok
+  def scr_init(filename), do: Server.invoke(:scr_init, {filename})
+
+  @doc """
+  Sets the virtual screen to the contents of
+       filename, which must have been written using scr_dump. The next call
+       to doupdate restores the screen to the way it looked in the dump file.
+  """
+  @spec scr_restore(String.t()) :: :ok
+  def scr_restore(filename), do: Server.invoke(:scr_restore, {filename})
+
+  @doc """
+  A combination of scr_restore and scr_init.
+  """
+  @spec scr_set(String.t()) :: :ok
+  def scr_set(filename), do: Server.invoke(:scr_set, {filename})
+
+  @doc """
   Enable scrolling on `stdscr`.
   """
   @spec scrollok() :: :ok

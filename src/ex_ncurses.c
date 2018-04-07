@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <limits.h>
 
 ERL_NIF_TERM key_to_elixir(ErlNifEnv *env, int code);
 
@@ -108,6 +109,21 @@ static void unload(ErlNifEnv *env, void *priv)
     enif_free(priv);
 }
 
+static bool
+get_c_string(ErlNifEnv *env, ERL_NIF_TERM bin_term, char *str, size_t max_length)
+{
+    ErlNifBinary string;
+    if (!enif_inspect_binary(env, bin_term, &string))
+        return false;
+
+    if (string.size >= max_length)
+        return false;
+
+    memcpy(str, string.data, string.size);
+    str[string.size] = 0;
+    return true;
+}
+
 static ERL_NIF_TERM make_error(ErlNifEnv *env, const char *error)
 {
     return enif_make_tuple2(env, enif_make_atom(env, "error"), enif_make_atom(env, error));
@@ -138,11 +154,11 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (data->ncurses_initialized)
         return data->atom_ok;
 
-    ErlNifBinary string;
-    if (!enif_inspect_binary(env, argv[0], &string))
+    char ttypath[PATH_MAX];
+    if (!get_c_string(env, argv[0], ttypath, sizeof(ttypath)))
         return enif_make_badarg(env);
 
-    if (string.size == 0 || (string.size == 8 && memcmp(string.data, "/dev/tty", 8) == 0)) {
+    if (ttypath[0] == '\0' || strcmp(ttypath, "/dev/tty") == 0) {
         // The user wants to take over Erlang's terminal
 
         // To avoid interfering with Erlang's tty_sl driver, we
@@ -181,11 +197,7 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         data->using_real_stdin = true;
     } else {
         // Use the user-supplied terminal instead
-        char termname[string.size + 1];
-        memcpy(termname, string.data, string.size);
-        termname[string.size] = 0;
-
-        data->stdin_fp = fopen(termname, "r+e");
+        data->stdin_fp = fopen(ttypath, "r+e");
         if (data->stdin_fp == NULL)
             return make_error(env, "enoent");
         data->stdin_fd = fileno(data->stdin_fp);
@@ -556,6 +568,42 @@ get_boolean(ErlNifEnv *env, ERL_NIF_TERM term, bool *v)
 }
 
 static ERL_NIF_TERM
+ex_scr_dump(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    char path[PATH_MAX];
+    if (!get_c_string(env, argv[0], path, sizeof(path)))
+        return enif_make_badarg(env);
+    return done(env, scr_dump(path));
+}
+
+static ERL_NIF_TERM
+ex_scr_init(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    char path[PATH_MAX];
+    if (!get_c_string(env, argv[0], path, sizeof(path)))
+        return enif_make_badarg(env);
+    return done(env, scr_init(path));
+}
+
+static ERL_NIF_TERM
+ex_scr_restore(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    char path[PATH_MAX];
+    if (!get_c_string(env, argv[0], path, sizeof(path)))
+        return enif_make_badarg(env);
+    return done(env, scr_restore(path));
+}
+
+static ERL_NIF_TERM
+ex_scr_set(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    char path[PATH_MAX];
+    if (!get_c_string(env, argv[0], path, sizeof(path)))
+        return enif_make_badarg(env);
+    return done(env, scr_set(path));
+}
+
+static ERL_NIF_TERM
 ex_scrollok(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
@@ -700,6 +748,10 @@ static ErlNifFunc invoke_funcs[] = {
     {"printw",       1, ex_printw,     0},
     {"raw",          0, ex_raw,        0},
     {"refresh",      0, ex_refresh,    0},
+    {"scr_dump",     1, ex_scr_dump,   0},
+    {"scr_init",     1, ex_scr_init,   0},
+    {"scr_restore",  1, ex_scr_restore, 0},
+    {"scr_set",      1, ex_scr_set,    0},
     {"scrollok",     0, ex_scrollok,   0},
     {"setscrreg",    2, ex_setscrreg,  0},
     {"start_color",  0, ex_start_color, 0},
