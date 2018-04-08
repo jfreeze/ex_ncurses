@@ -423,6 +423,18 @@ ex_attroff(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+ex_attrset(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    int attr;
+    if (!enif_get_int(env, argv[0], &attr))
+        return enif_make_badarg(env);
+
+    int code = attrset(attr);
+
+    return done(env, code);
+}
+
+static ERL_NIF_TERM
 ex_border(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     // Use the defaults
@@ -662,6 +674,7 @@ static ErlNifFunc invoke_funcs[] = {
     {"addstr",       1, ex_printw,     0},
     {"attron",       1, ex_attron,     0},
     {"attroff",      1, ex_attroff,    0},
+    {"attrset",      1, ex_attrset,    0},
     {"beep",         0, ex_beep,       0},
     {"border",       0, ex_border,     0},
     {"cbreak",       0, ex_cbreak,     0},

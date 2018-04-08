@@ -86,6 +86,12 @@ defmodule ExNcurses do
   @spec attron(non_neg_integer()) :: :ok
   def attron(attrs), do: attr_build(:attron, attrs)
 
+  @doc """
+  Sets attributes to the specified value
+  """
+  @spec attrset(non_neg_integer()) :: :ok
+  def attrset(attrs), do: attr_build(:attrset, attrs)
+
   @spec beep() :: :ok
   def beep(), do: Server.invoke(:beep)
 
