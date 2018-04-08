@@ -1,4 +1,6 @@
 defmodule ExNcurses do
+  use Bitwise
+
   alias ExNcurses.{Getstr, Server}
 
   @moduledoc """
@@ -44,17 +46,45 @@ defmodule ExNcurses do
   @spec addstr(String.t()) :: :ok
   def addstr(s), do: Server.invoke(:addstr, {s})
 
+  defp attr_build(call, attrs) when is_list(attrs) do
+    attrs = attrs
+    |> Enum.map(fn attr ->
+      case attr do
+        :standout -> 1 <<< 16
+        :underline -> 1 <<< 17
+        :reverse -> 1 <<< 18
+        :blink -> 1 <<< 19
+        :dim -> 1 <<< 20
+        :bold -> 1 <<< 21
+        :alt_charset -> 1 <<< 22
+        :invis -> 1 <<< 23
+        :protect -> 1 <<< 24
+        :horizontal -> 1 <<< 25
+        :left -> 1 <<< 26
+        :low -> 1 <<< 27
+        :right -> 1 <<< 28
+        :top -> 1 <<< 29
+        :vertical -> 1 <<< 30
+        attr when attr < (1 <<< 8) -> attr <<< 8 # num < 256 represents a color pair
+        _ -> attr
+      end
+    end)
+    |> Enum.reduce(&(&1 ||| &2))
+    Server.invoke(call, {attrs})
+  end
+  defp attr_build(call, attrs), do: attr_build(call, [attrs])
+
   @doc """
   Turn off the bit-masked attribute values pass in on the current screen.
   """
-  @spec attroff(pair()) :: :ok
-  def attroff(pair), do: Server.invoke(:attroff, {pair})
+  @spec attroff(non_neg_integer()) :: :ok
+  def attroff(attrs), do: attr_build(:attroff, attrs)
 
   @doc """
   Turn on the bit-masked attribute values pass in on the current screen.
   """
-  @spec attron(pair()) :: :ok
-  def attron(pair), do: Server.invoke(:attron, {pair})
+  @spec attron(non_neg_integer()) :: :ok
+  def attron(attrs), do: attr_build(:attron, attrs)
 
   @spec beep() :: :ok
   def beep(), do: Server.invoke(:beep)

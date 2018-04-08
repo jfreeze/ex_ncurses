@@ -401,11 +401,11 @@ ex_mvcur(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 static ERL_NIF_TERM
 ex_attron(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
-    int pair;
-    if (!enif_get_int(env, argv[0], &pair))
+    int attr;
+    if (!enif_get_int(env, argv[0], &attr))
         return enif_make_badarg(env);
 
-    int code = attron(COLOR_PAIR(pair));
+    int code = attron(attr);
 
     return done(env, code);
 }
@@ -413,11 +413,11 @@ ex_attron(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 static ERL_NIF_TERM
 ex_attroff(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
-    int pair;
-    if (!enif_get_int(env, argv[0], &pair))
+    int attr;
+    if (!enif_get_int(env, argv[0], &attr))
         return enif_make_badarg(env);
 
-    int code = attroff(COLOR_PAIR(pair));
+    int code = attroff(attr);
 
     return done(env, code);
 }
