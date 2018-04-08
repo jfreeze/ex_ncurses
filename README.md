@@ -82,3 +82,12 @@ It's still there. It won't receive any input between calls to
 to do with the console. It could be redirected, output could be thrown away,
 etc. At the moment, you'll likely want to turn on the Elixir console logger so
 that it doesn't interfere with the display.
+
+### Something is crashing Erlang! What do I do
+
+Try editing `src/ex_ncurses.c` and uncomment the `#define DEBUG` line. This logs
+timing and function entry/exit information to `ex_ncurses.log`. If something
+crashes, it should hopefully provide more information. Please post an issue if
+you find a crash with the log and details on how to reproduce. Or if you're up
+to it, please send a Pull Request with a fix. We appreciate any help you can
+provide to make this a better library.
