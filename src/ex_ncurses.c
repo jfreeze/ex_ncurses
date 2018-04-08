@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <sys/stat.h>
 
 ERL_NIF_TERM key_to_elixir(ErlNifEnv *env, int code);
 
@@ -21,6 +22,7 @@ struct ex_ncurses_priv {
     void *resource;
 
     bool using_real_stdin;
+    bool using_regular_file;
 
     int stdin_fd;
     FILE *stdin_fp;
@@ -93,6 +95,7 @@ static int load(ErlNifEnv *env, void **priv, ERL_NIF_TERM info)
 
     data->ncurses_initialized = false;
     data->using_real_stdin = false;
+    data->using_regular_file = false;
 
     data->polling = false;
 
@@ -195,12 +198,22 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         newterm(getenv("TERM"), stdout, data->stdin_fp);
 
         data->using_real_stdin = true;
+        data->using_regular_file = false;
     } else {
         // Use the user-supplied terminal instead
         data->stdin_fp = fopen(ttypath, "r+e");
         if (data->stdin_fp == NULL)
             return make_error(env, "enoent");
         data->stdin_fd = fileno(data->stdin_fp);
+
+        // Check whether the user gave us a regular file so we
+        // know whether to allow input.
+        struct stat st;
+        if (fstat(data->stdin_fd, &st) < 0 ||
+            st.st_mode & S_IFREG)
+            data->using_regular_file = true;
+        else
+            data->using_regular_file = false;
 
         newterm(getenv("TERM"), data->stdin_fp, data->stdin_fp);
 
@@ -679,7 +692,7 @@ ex_poll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!data->ncurses_initialized)
         return make_error(env, "uninitialized");
 
-    if (data->polling)
+    if (data->polling || data->using_regular_file)
         return data->atom_ok;
 
     data->polling = true;
@@ -699,6 +712,9 @@ ex_read(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     struct ex_ncurses_priv *data = enif_priv_data(env);
     if (!data->ncurses_initialized)
         return make_error(env, "uninitialized");
+
+    if (data->using_regular_file)
+        return enif_make_int(env, -1);
 
     int code = getch();
     if (code < 0) {
