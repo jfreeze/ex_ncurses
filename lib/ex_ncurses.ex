@@ -76,18 +76,36 @@ defmodule ExNcurses do
 
   @doc """
   Turn off the bit-masked attribute values pass in on the current screen.
+
+  Can take a single value or List of values from the following:
+
+  * A number less than 256 which is assumed to be a color pair
+  * Any of `:underline`, `:reverse`, `:blink`, `:dim`, `:bold`, `:alt_charset`, `:invis`,
+  `:protect`, `:horizontal`, `:left`, `:low`, `:right`, `:top`, `:vertical`
   """
   @spec attroff(non_neg_integer()) :: :ok
   def attroff(attrs), do: attr_build(:attroff, attrs)
 
   @doc """
   Turn on the bit-masked attribute values pass in on the current screen.
+
+  Can take a single value or List of values from the following:
+
+  * A number less than 256 which is assumed to be a color pair
+  * Any of `:underline`, `:reverse`, `:blink`, `:dim`, `:bold`, `:alt_charset`, `:invis`,
+  `:protect`, `:horizontal`, `:left`, `:low`, `:right`, `:top`, `:vertical`
   """
   @spec attron(non_neg_integer()) :: :ok
   def attron(attrs), do: attr_build(:attron, attrs)
 
   @doc """
   Sets attributes to the specified value
+
+  Can take a single value or List of values from the following:
+
+  * A number less than 256 which is assumed to be a color pair
+  * Any of `:underline`, `:reverse`, `:blink`, `:dim`, `:bold`, `:alt_charset`, `:invis`,
+  `:protect`, `:horizontal`, `:left`, `:low`, `:right`, `:top`, `:vertical`
   """
   @spec attrset(non_neg_integer()) :: :ok
   def attrset(attrs), do: attr_build(:attrset, attrs)
