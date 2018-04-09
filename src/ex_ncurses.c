@@ -718,7 +718,7 @@ ex_poll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     data->polling = true;
     int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_READ, data->resource, NULL,
-                         data->atom_undefined);
+                         argv[0]);
     debug("enif_select -> %d", rc);
     if (rc >= 0) {
         return data->atom_ok;
@@ -748,7 +748,7 @@ ex_read(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (data->polling) {
         debug("ex_read calling enif_select");
         int rc = enif_select(env, data->stdin_fd, ERL_NIF_SELECT_READ, data->resource, NULL,
-                             data->atom_undefined);
+                             argv[0]);
         debug("ex_read enif_select returned %d", rc);
         if (rc < 0) {
             data->polling = false;
@@ -841,8 +841,8 @@ static ErlNifFunc nif_funcs[] = {
     {"endwin",    0, ex_endwin,  0},
     {"newterm",   2, ex_newterm, 0},
     {"invoke",    2, ex_invoke,  0},
-    {"poll",      0, ex_poll,    0},
-    {"read",      0, ex_read,    0}
+    {"poll",      1, ex_poll,    0},
+    {"read",      1, ex_read,    0}
 };
 
 ERL_NIF_INIT(Elixir.ExNcurses.Nif, nif_funcs,

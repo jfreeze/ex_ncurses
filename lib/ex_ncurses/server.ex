@@ -9,7 +9,8 @@ defmodule ExNcurses.Server do
 
   defmodule State do
     @moduledoc false
-    defstruct pid: nil
+    defstruct pid: nil,
+              input_ref: nil
   end
 
   def start_link(args) do
@@ -55,7 +56,7 @@ defmodule ExNcurses.Server do
   end
 
   def init(_args) do
-    {:ok, %State{}}
+    {:ok, %State{input_ref: :erlang.make_ref()}}
   end
 
   def handle_call({:newterm, term, ttyname}, _from, state) do
@@ -74,7 +75,7 @@ defmodule ExNcurses.Server do
     :erlang.system_flag(:multi_scheduling, :unblock)
 
     # Assuming initialization was ok, start polling stdin for key presses
-    if rc == :ok, do: Nif.poll()
+    if rc == :ok, do: Nif.poll(state.input_ref)
 
     {:reply, rc, state}
   end
@@ -98,8 +99,8 @@ defmodule ExNcurses.Server do
     {:reply, :ok, %{state | pid: nil}}
   end
 
-  def handle_info({:select, _res, _ref, :ready_input}, state) do
-    key = Nif.read()
+  def handle_info({:select, _res, input_ref, :ready_input}, %{input_ref: input_ref} = state) do
+    key = Nif.read(input_ref)
     maybe_send(state.pid, {:ex_ncurses, :key, key})
     {:noreply, state}
   end

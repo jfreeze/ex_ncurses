@@ -16,15 +16,15 @@ defmodule ExNcurses.Nif do
 
   @doc """
   Poll for events from ncurses. When an event is ready,
-  {:select, _res, _ref, :ready_input} will be sent back and
+  {:select, _res, input_ref, :ready_input} will be sent back and
   then `read/0` should be called to get the event.
   """
-  def poll(), do: :erlang.nif_error(:nif_not_loaded)
+  def poll(_input_ref), do: :erlang.nif_error(:nif_not_loaded)
 
   @doc """
-  Read an event.
+  Read an event and call enif_select again for the next one.
   """
-  def read(), do: :erlang.nif_error(:nif_not_loaded)
+  def read(_input_ref), do: :erlang.nif_error(:nif_not_loaded)
 
   @doc """
   Stop using ncurses.
