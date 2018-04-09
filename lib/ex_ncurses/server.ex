@@ -1,5 +1,6 @@
 defmodule ExNcurses.Server do
   use GenServer
+  require Logger
   alias ExNcurses.Nif
 
   @moduledoc """
@@ -102,6 +103,11 @@ defmodule ExNcurses.Server do
   def handle_info({:select, _res, input_ref, :ready_input}, %{input_ref: input_ref} = state) do
     key = Nif.read(input_ref)
     maybe_send(state.pid, {:ex_ncurses, :key, key})
+    {:noreply, state}
+  end
+
+  def handle_info(msg, state) do
+    Logger.error("ex_ncurses unknown message #{inspect msg}")
     {:noreply, state}
   end
 
