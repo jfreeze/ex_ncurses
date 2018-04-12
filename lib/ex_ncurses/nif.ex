@@ -12,7 +12,7 @@ defmodule ExNcurses.Nif do
   @doc """
   Initialize ncurses on the specified terminal.
   """
-  def initscr(_termname), do: :erlang.nif_error(:nif_not_loaded)
+  def newterm(_term, _ttyname), do: :erlang.nif_error(:nif_not_loaded)
 
   @doc """
   Poll for events from ncurses. When an event is ready,

@@ -78,10 +78,10 @@ upper left is (0, 0).
 ### What happened to the Elixir console
 
 It's still there. It won't receive any input between calls to
-`ExNcurses.initscr/0` and `ExNcurses.endwin/0`. I'm still on the fence with what
-to do with the console. It could be redirected, output could be thrown away,
-etc. At the moment, you'll likely want to turn on the Elixir console logger so
-that it doesn't interfere with the display.
+`ExNcurses.initscr/1`/`ExNcurses.newterm/3` and `ExNcurses.endwin/0`. I'm still
+on the fence with what to do with the console. It could be redirected, output
+could be thrown away, etc. At the moment, you'll likely want to turn on the
+Elixir console logger so that it doesn't interfere with the display.
 
 ### Something is crashing Erlang! What do I do
 

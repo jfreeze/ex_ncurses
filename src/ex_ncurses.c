@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <locale.h>
 #include <sys/stat.h>
 
 //#define DEBUG
@@ -172,15 +173,17 @@ done_with_value(ErlNifEnv *env, int code)
 }
 
 static ERL_NIF_TERM
-ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+ex_newterm(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
-    debug("ex_initscr");
+    debug("ex_newterm");
     struct ex_ncurses_priv *data = enif_priv_data(env);
     if (data->ncurses_initialized)
         return data->atom_ok;
 
+    char term[64];
     char ttypath[PATH_MAX];
-    if (!get_c_string(env, argv[0], ttypath, sizeof(ttypath)))
+    if (!get_c_string(env, argv[0], term, sizeof(term)) ||
+        !get_c_string(env, argv[1], ttypath, sizeof(ttypath)))
         return enif_make_badarg(env);
 
     if (ttypath[0] == '\0' || strcmp(ttypath, "/dev/tty") == 0) {
@@ -200,13 +203,6 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
             close(data->stdin_fd);
             return make_error(env, "pipe");
         }
-        // NOTE: dup2 automatically closes STDIN_FILENO before replacing it
-        //       so no need to call close. Unfortunately, if STDIN_FILENO is
-        //       in another Erlang thread's call to select(2), select will
-        //       return an error on the handle which will then get printed
-        //       to the console. It would be nice if initscr could be
-        //       guaranteed to be called from the thread servicing the
-        //       console, but I don't know how to do that. :(
         int rc = dup2(data->pipe_to_nowhere[0], STDIN_FILENO);
         if (rc != STDIN_FILENO) {
             error("Error replacing stdin");
@@ -215,9 +211,7 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
         data->stdin_fp = fdopen(data->stdin_fd, "r");
 
-        // initscr invokes newterm insternally. Update it with
-        // our new "stdin"
-        newterm(getenv("TERM"), stdout, data->stdin_fp);
+        newterm(term, stdout, data->stdin_fp);
 
         data->using_real_stdin = true;
         data->using_regular_file = false;
@@ -237,12 +231,12 @@ ex_initscr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         else
             data->using_regular_file = false;
 
-        newterm(getenv("TERM"), data->stdin_fp, data->stdin_fp);
+        newterm(term, data->stdin_fp, data->stdin_fp);
 
         data->using_real_stdin = false;
     }
     data->ncurses_initialized = true;
-    debug("initscr done");
+    debug("newterm done");
     return data->atom_ok;
 }
 
@@ -262,7 +256,7 @@ ex_endwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     }
 
     if (data->using_real_stdin) {
-        // Undo our manipulation of filehandles from initscr
+        // Undo our manipulation of filehandles from newterm
         // by dup'ing the real stdin back to STDIN_FILENO.
         dup2(data->stdin_fd, STDIN_FILENO);
 
@@ -819,7 +813,7 @@ ex_invoke(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
             !enif_get_tuple(env, argv[1], &arity, &array))
         return enif_make_badarg(env);
 
-    // Check that initscr has been called
+    // Check that newterm has been called
     struct ex_ncurses_priv *data = enif_priv_data(env);
     if (!data->ncurses_initialized)
         return make_error(env, "uninitialized");
@@ -842,7 +836,7 @@ ex_invoke(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
 static ErlNifFunc nif_funcs[] = {
     {"endwin",    0, ex_endwin,  0},
-    {"initscr",   1, ex_initscr, 0},
+    {"newterm",   2, ex_newterm, 0},
     {"invoke",    2, ex_invoke,  0},
     {"poll",      0, ex_poll,    0},
     {"read",      0, ex_read,    0}

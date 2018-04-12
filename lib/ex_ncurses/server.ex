@@ -22,8 +22,8 @@ defmodule ExNcurses.Server do
   If "", the current terminal (the one with the IEx prompt)
   is used. You can also specify another terminal.
   """
-  def initscr(termname) do
-    GenServer.call(__MODULE__, {:initscr, termname})
+  def newterm(term, ttyname) do
+    GenServer.call(__MODULE__, {:newterm, term, ttyname})
   end
 
   @doc """
@@ -58,10 +58,10 @@ defmodule ExNcurses.Server do
     {:ok, %State{}}
   end
 
-  def handle_call({:initscr, termname}, _from, state) do
+  def handle_call({:newterm, term, ttyname}, _from, state) do
     # Handling the case where termname specifies the terminal with the console:
     #
-    # The NIF swaps out stdin in the call to initscr so that the IEx console or
+    # The NIF swaps out stdin in the call to newterm so that the IEx console or
     # any Erlang console code doesn't processes keys that should go to ncurses.
     # In order for this to work reliably, the stdin filehandle cannot be in
     # use.  Specifically, it can't be submitted to a syscall since the swapping
@@ -70,7 +70,7 @@ defmodule ExNcurses.Server do
     # would normally be an unforgivable offense to the Erlang VM, but
     # presumably ncurses isn't being initialized frequently.
     :erlang.system_flag(:multi_scheduling, :block)
-    rc = Nif.initscr(termname)
+    rc = Nif.newterm(term, ttyname)
     :erlang.system_flag(:multi_scheduling, :unblock)
 
     # Assuming initialization was ok, start polling stdin for key presses

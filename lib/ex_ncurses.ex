@@ -245,8 +245,18 @@ defmodule ExNcurses do
 
   TODO: Return stdscr (a window)
   """
+  @spec newterm(String.t(), String.t()) :: :ok
+  defdelegate newterm(term, ttyname), to: Server
+
+  @doc """
+  Initialize ncurses on a terminal. This should be called before any of the
+  other functions. This is a helper function that calls `newterm/2` just like
+  how `initscr()` calls `newterm()` in C.
+  """
   @spec initscr(String.t()) :: :ok
-  defdelegate initscr(termname \\ ""), to: Server
+  def initscr(ttyname \\ "") do
+    newterm(System.get_env("TERM"), ttyname)
+  end
 
   @doc """
   Initialize a foreground/background color pair
