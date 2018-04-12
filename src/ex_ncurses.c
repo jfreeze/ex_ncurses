@@ -180,6 +180,9 @@ ex_newterm(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (data->ncurses_initialized)
         return data->atom_ok;
 
+    // Enable UTF-8 support
+    setlocale(LC_ALL, "");
+
     char term[64];
     char ttypath[PATH_MAX];
     if (!get_c_string(env, argv[0], term, sizeof(term)) ||
