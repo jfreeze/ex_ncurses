@@ -110,7 +110,8 @@ static int load(ErlNifEnv *env, void **priv, ERL_NIF_TERM info)
     data->atom_undefined = enif_make_atom(env, "undefined");
 
     data->rt = enif_open_resource_type_x(env, "monitor", &rt_init, ERL_NIF_RT_CREATE, NULL);
-    data->window_rt = enif_open_resource_type_x(env, "window", &window_rt_init, ERL_NIF_RT_CREATE, NULL);
+    data->window_rt = enif_open_resource_type_x(env, "window", &window_rt_init, ERL_NIF_RT_CREATE,
+                                                NULL);
 
     data->resource = enif_alloc_resource(data->rt, sizeof(int));
 
@@ -186,7 +187,7 @@ ex_newterm(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     char term[64];
     char ttypath[PATH_MAX];
     if (!get_c_string(env, argv[0], term, sizeof(term)) ||
-        !get_c_string(env, argv[1], ttypath, sizeof(ttypath)))
+            !get_c_string(env, argv[1], ttypath, sizeof(ttypath)))
         return enif_make_badarg(env);
 
     if (ttypath[0] == '\0' || strcmp(ttypath, "/dev/tty") == 0) {
@@ -229,7 +230,7 @@ ex_newterm(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         // know whether to allow input.
         struct stat st;
         if (fstat(data->stdin_fd, &st) < 0 ||
-            st.st_mode & S_IFREG)
+                st.st_mode & S_IFREG)
             data->using_regular_file = true;
         else
             data->using_regular_file = false;
@@ -370,7 +371,7 @@ ex_wrefresh(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
     struct ex_window *obj;
-    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj))
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void **) &obj))
         return enif_make_badarg(env);
 
     int code = wrefresh(obj->win);
@@ -499,7 +500,7 @@ ex_wborder(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
     struct ex_window *obj;
-    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj))
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void **) &obj))
         return enif_make_badarg(env);
 
     // Use the defaults
@@ -519,7 +520,7 @@ ex_wclear(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
     struct ex_window *obj;
-    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj))
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void **) &obj))
         return enif_make_badarg(env);
 
     return done(env, wclear(obj->win));
@@ -579,7 +580,7 @@ ex_delwin(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     struct ex_ncurses_priv *data = enif_priv_data(env);
     struct ex_window *obj;
-    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj))
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void **) &obj))
         return enif_make_badarg(env);
 
     return done(env, delwin(obj->win));
@@ -644,7 +645,7 @@ ex_scrollok(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     bool is_scrollok = true;
     if (argc == 2) {
         struct ex_window *obj;
-        if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj) ||
+        if (!enif_get_resource(env, argv[0], data->window_rt, (void **) &obj) ||
                 !get_boolean(env, argv[1], &is_scrollok))
             return enif_make_badarg(env);
         win = obj->win;
@@ -658,7 +659,7 @@ ex_waddstr(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     struct ex_ncurses_priv *data = enif_priv_data(env);
     struct ex_window *obj;
     ErlNifBinary string;
-    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj) ||
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void **) &obj) ||
             !enif_inspect_binary(env, argv[1], &string))
         return enif_make_badarg(env);
 
@@ -674,8 +675,8 @@ ex_wmove(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     struct ex_ncurses_priv *data = enif_priv_data(env);
     struct ex_window *obj;
     int y, x;
-    if (!enif_get_resource(env, argv[0], data->window_rt, (void**) &obj) ||
-            !enif_get_int(env, argv[1], &y)||
+    if (!enif_get_resource(env, argv[0], data->window_rt, (void **) &obj) ||
+            !enif_get_int(env, argv[1], &y) ||
             !enif_get_int(env, argv[2], &x))
         return enif_make_badarg(env);
 

@@ -47,31 +47,68 @@ defmodule ExNcurses do
   def addstr(s), do: Server.invoke(:addstr, {s})
 
   defp attr_build(call, attrs) when is_list(attrs) do
-    attrs = attrs
-    |> Enum.map(fn attr ->
-      case attr do
-        :standout -> 1 <<< 16
-        :underline -> 1 <<< 17
-        :reverse -> 1 <<< 18
-        :blink -> 1 <<< 19
-        :dim -> 1 <<< 20
-        :bold -> 1 <<< 21
-        :alt_charset -> 1 <<< 22
-        :invis -> 1 <<< 23
-        :protect -> 1 <<< 24
-        :horizontal -> 1 <<< 25
-        :left -> 1 <<< 26
-        :low -> 1 <<< 27
-        :right -> 1 <<< 28
-        :top -> 1 <<< 29
-        :vertical -> 1 <<< 30
-        attr when attr < (1 <<< 8) -> attr <<< 8 # num < 256 represents a color pair
-        _ -> attr
-      end
-    end)
-    |> Enum.reduce(&(&1 ||| &2))
+    attrs =
+      attrs
+      |> Enum.map(fn attr ->
+        case attr do
+          :standout ->
+            1 <<< 16
+
+          :underline ->
+            1 <<< 17
+
+          :reverse ->
+            1 <<< 18
+
+          :blink ->
+            1 <<< 19
+
+          :dim ->
+            1 <<< 20
+
+          :bold ->
+            1 <<< 21
+
+          :alt_charset ->
+            1 <<< 22
+
+          :invis ->
+            1 <<< 23
+
+          :protect ->
+            1 <<< 24
+
+          :horizontal ->
+            1 <<< 25
+
+          :left ->
+            1 <<< 26
+
+          :low ->
+            1 <<< 27
+
+          :right ->
+            1 <<< 28
+
+          :top ->
+            1 <<< 29
+
+          :vertical ->
+            1 <<< 30
+
+          # num < 256 represents a color pair
+          attr when attr < 1 <<< 8 ->
+            attr <<< 8
+
+          _ ->
+            attr
+        end
+      end)
+      |> Enum.reduce(&(&1 ||| &2))
+
     Server.invoke(call, {attrs})
   end
+
   defp attr_build(call, attrs), do: attr_build(call, [attrs])
 
   @doc """
