@@ -62,6 +62,7 @@ To run any of the example scripts, start them by invoking the `run_example.sh`:
 More examples can be found at:
 
 * [Snake](https://github.com/fhunleth/snake)
+* [Spacelixir](https://github.com/MarceloMPJ/Spacelixir)
 
 ## FAQ
 
