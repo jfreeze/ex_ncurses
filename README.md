@@ -17,7 +17,7 @@ In general, this library provides a thin wrapper on most ncurses functions.
 That means that the documentation and examples for the C library should apply
 fairly directly. There are some differences:
 
-* #defines are now atoms. For exaample, instead of `KEY_UP` for up arrow, you'll
+* #defines are now atoms. For example, instead of `KEY_UP` for up arrow, you'll
   receive the atom `:up`.
 * Keyboard input comes in as `{ex_ncurses, :key, code}` messages if you call
   `listen/0`. You can still call `getch()` like in C, but it doesn't have the
